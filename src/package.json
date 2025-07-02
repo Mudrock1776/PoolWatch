@@ -1,0 +1,27 @@
+{
+  "name": "poolwatch",
+  "version": "0.0.1",
+  "description": "Pool Watch webserver and website",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mudrock1776/PoolWatch.git"
+  },
+  "keywords": [
+    "IoT",
+    "\"Senior",
+    "Design\"",
+    "Pool",
+    "Monitoring",
+    "Next"
+  ],
+  "author": "Dylan Hughes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mudrock1776/PoolWatch/issues"
+  },
+  "homepage": "https://github.com/Mudrock1776/PoolWatch#readme"
+}
