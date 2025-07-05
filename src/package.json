@@ -4,7 +4,10 @@
   "description": "Pool Watch webserver and website",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./server/server.js",
+    "build": "npm install && cd client && npm install && npm run build",
+    "clean": "rm -r node_modules && rm package-lock.json && cd client && rm -r node_modules && rm -r .next && rm -r out && rm next-env.d.ts"
   },
   "repository": {
     "type": "git",
@@ -23,5 +26,11 @@
   "bugs": {
     "url": "https://github.com/Mudrock1776/PoolWatch/issues"
   },
-  "homepage": "https://github.com/Mudrock1776/PoolWatch#readme"
+  "homepage": "https://github.com/Mudrock1776/PoolWatch#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.1"
+  }
 }
