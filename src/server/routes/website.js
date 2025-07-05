@@ -77,7 +77,7 @@ Routes.route("/device/remove").post((req,res) => {
 }
 on success returns 200:
 [Device list]*/
-Routes.route("/device/list").get((req,res)=>{
+Routes.route("/device/list").post((req,res)=>{
     website.listDevices(req,res);
 });
 
@@ -87,7 +87,7 @@ Routes.route("/device/list").get((req,res)=>{
     serialNumber: <serial number>
 }
 on success returns 200: Device */
-Routes.route("/device/fetch").get((req,res)=>{
+Routes.route("/device/fetch").post((req,res)=>{
     website.fetchDevice(req,res);
 });
 

@@ -1,5 +1,5 @@
 const account = require("../models/account");
-const device = require("../models/account");
+const device = require("../models/device");
 const mongoose = require("mongoose");
 
 //acounts
@@ -90,14 +90,15 @@ exports.removeDevice = async (req, res) => {
 exports.listDevices = async (req, res) => {
     try{
         userAccount = await account.findById(req.body.id);
-        deviceList = [];
-        userAccount.devices.forEach(async (item, index) => {
-            deviceList.push(await device.find({serialNumber: item}));
-        });
-        res.status(200).send(deviceList);
+        let deviceList = [];
+        for (let i=0; i<userAccount.devices.length; i++){
+            pulledDevice = await device.findOne({serialNumber: userAccount.devices[i]});
+            deviceList.push(pulledDevice);
+        }
+        await res.status(200).send(deviceList);
     } catch(err){
         console.log(err);
-        res.status(400).send(err);
+        await res.status(400).send(err);
     }
 }
 
