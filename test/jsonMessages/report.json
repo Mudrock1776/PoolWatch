@@ -1,3 +1,9 @@
 {
-    
+    "serialNumber": 1,
+    "report": {
+        "ClCon": 0.5,
+        "PCon": 0.2,
+        "Tempature": 82,
+        "Depth": 5
+    }
 }

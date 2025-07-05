@@ -1,4 +1,4 @@
-const device = require("../models/account");
+const device = require("../models/device");
 const report = require("../models/report");
 const mongoose = require("mongoose");
 
@@ -48,11 +48,11 @@ exports.createDevice = async (req, res) => {
 //Add Report
 exports.addReport = async (req, res) => {
     try {
-        newReport = new report(req.body.report);
+        newReport = req.body.report;
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
         searchedDevice.reports.push(newReport);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
-        res.status().send({
+        res.status(200).send({
             update: false
         });
     } catch(err){

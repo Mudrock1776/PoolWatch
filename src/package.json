@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/Mudrock1776/PoolWatch#readme",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",

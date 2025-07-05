@@ -23,7 +23,7 @@ app.get('/{*path}', (req,res) => {
     res.sendFile(path.resolve(__dirname, "../client/out", "index.html"));
 });
 
-app.listen(process.env.WEB_PORT, () => {
+app.listen(process.env.WEB_PORT, async () => {
     console.log(`Server is running on port: ${process.env.WEB_PORT}`);
     console.log(`Connected to Database ${process.env.MONGOURL}`)
 });

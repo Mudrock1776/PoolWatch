@@ -7,4 +7,4 @@ const notify = new Schema({
     when: {type: String},
 });
 
-module.exports = mongoose.model("notify",notify);
+module.exports = notify;

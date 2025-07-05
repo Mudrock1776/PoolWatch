@@ -16,7 +16,7 @@ On success returns 200:
 {
     answer: false
 } if device does not exists */
-Routes.route("/device/exists").get((req,res) => {
+Routes.route("/device/exists").post((req,res) => {
     device.deviceExists(req,res);
 });
 
