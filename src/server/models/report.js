@@ -10,4 +10,4 @@ const report = new Schema ({
     timestamps: true
 });
 
-module.exports = report;
+module.exports = mongoose.model("report",report);
