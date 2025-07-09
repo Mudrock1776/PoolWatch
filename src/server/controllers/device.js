@@ -48,7 +48,7 @@ exports.createDevice = async (req, res) => {
 //Add Report
 exports.addReport = async (req, res) => {
     try {
-        newReport = req.body.report;
+        const newReport = req.body.report;
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
         searchedDevice.reports.push(newReport);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
