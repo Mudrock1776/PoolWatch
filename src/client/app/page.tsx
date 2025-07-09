@@ -18,7 +18,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const tokenString = sessionStorage.getItem("PoolWatchtoken");
+    const tokenString = localStorage.getItem("PoolWatchtoken");
     if (tokenString != null){
       redirect("/main");
     }
@@ -47,7 +47,7 @@ export default function Home() {
         return;
       } else {
         let token = await res.json();
-        sessionStorage.setItem('PoolWatchtoken', token.token);
+        localStorage.setItem('PoolWatchtoken', token.token);
         redirect("/main");
       }
     } else {
@@ -66,7 +66,7 @@ export default function Home() {
         return;
       } else {
         let token = await res.json();
-        sessionStorage.setItem('PoolWatchtoken', token.token);
+        localStorage.setItem('PoolWatchtoken', token.token);
         redirect("/main");
       }
     }

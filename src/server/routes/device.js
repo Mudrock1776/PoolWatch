@@ -46,8 +46,8 @@ Routes.route("/device/create").post((req,res) =>{
     report: {
         ClCon: <Chlorine Concentration>,
         PCon: <Phosphoric acid concentration>,
-        Tempature: <Tempature>,
-        Depth: <Depth>
+        particulateAmount: <amount of particulates>,
+        particulateSize: <size of particulates>
     }
 }
 on success returns 200:

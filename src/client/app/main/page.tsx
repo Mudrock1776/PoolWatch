@@ -8,7 +8,7 @@ export default function Page(){
     
     useEffect(() => {
         async function loadDevices() {
-            const tokenString = sessionStorage.getItem("PoolWatchtoken");
+            const tokenString = localStorage.getItem("PoolWatchtoken");
             const res = await fetch("/device/list", {
                 method: "POST",
                 headers: {
@@ -20,7 +20,7 @@ export default function Page(){
               });
             setDevices(await res.json());
         }
-        const tokenString = sessionStorage.getItem("PoolWatchtoken");
+        const tokenString = localStorage.getItem("PoolWatchtoken");
         if (tokenString == null){
             redirect("/");
         }
@@ -29,7 +29,7 @@ export default function Page(){
 
     async function onsubmit(e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>){
         e.preventDefault();
-        const tokenString = sessionStorage.getItem("PoolWatchtoken");
+        const tokenString = localStorage.getItem("PoolWatchtoken");
         const res = await fetch("/device/add", {
             method: "POST",
             headers: {
@@ -40,23 +40,28 @@ export default function Page(){
                 serialNumber: serialNumberForm
             })
           });
-        // const res2 = await fetch("/device/list", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     body: JSON.stringify({
-        //         id: tokenString
-        //     })
-        // });
-        // let loadedDevices = await res2.json();
-        // setDevices(loadedDevices);
+        const res2 = await fetch("/device/list", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: tokenString
+            })
+        });
+        let loadedDevices = await res2.json();
+        setDevices(loadedDevices);
+    }
+
+    function deviceRedirect(serialNumber:Number){
+        sessionStorage.setItem("serial", serialNumber.toString());
+        redirect("/main/device");
     }
 
     function list(){
         return devices.map((device) => {
             return(
-                <li>{device.serialNumber}</li>
+                <li onClick={(e) => deviceRedirect(device.serialNumber)}>{device.serialNumber}</li>
             )
         })
     }
