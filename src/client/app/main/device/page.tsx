@@ -44,8 +44,9 @@ export default function Page(){
         var index = -1;
         return(device.reports.map((item:any) => {
             index += 1;
+            const curIndex = index;
             return(
-                <li onClick={(e)=>{reportRedirect(index)}}>Report at {item.createdAt}</li>
+                <li onClick={(e)=>{reportRedirect(curIndex)}}>Report at {item.testTaken}</li>
             );
         }));
     }

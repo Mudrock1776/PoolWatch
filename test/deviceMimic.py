@@ -1,5 +1,6 @@
 import socket
 import json
+import time
 
 HOST = 'localhost'
 PORT = 8080   
@@ -50,6 +51,28 @@ if not answer["answer"]:
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 with open("./jsonMessages/report.json","r") as f:
+    body = json.load(f)
+    body = json.dumps(body)
+    msg = (
+        f"POST /report/add HTTP/1.1\r\n"
+        f"Host: {HOST}:{PORT}\r\n"
+        "Content-Type: application/json\r\n"
+        f"Content-Length: {len(body)}\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        f"{body}"
+    )
+client.connect(("localhost",8080))
+print(msg+"\n")
+client.sendall(msg.encode())
+response = client.recv(1024).decode()
+print(response)
+client.close()
+
+time.sleep(10)
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+with open("./jsonMessages/report2.json","r") as f:
     body = json.load(f)
     body = json.dumps(body)
     msg = (

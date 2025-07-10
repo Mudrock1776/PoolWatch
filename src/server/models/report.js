@@ -6,7 +6,8 @@ const report = new Schema ({
     PCon: {type: Number},
     tempature: {type: Number},
     particulateAmount: {type: Number},
-    particulateSize: {type: Number}
+    particulateSize: {type: String},
+    testTaken: {type: String},
 },{
     timestamps: true
 });

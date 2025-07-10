@@ -49,8 +49,10 @@ exports.createDevice = async (req, res) => {
 exports.addReport = async (req, res) => {
     try {
         const newReport = req.body.report;
+        const now = new Date();
+        newReport.testTaken = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear()} - ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
-        searchedDevice.reports.push(newReport);
+        searchedDevice.reports.unshift(newReport);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send({
             update: false

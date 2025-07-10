@@ -13,6 +13,7 @@ export default function Page(){
         updateServers: [],
         reports: [{
             createdAt: 0,
+            testTaken: 0,
             ClCon: 0,
             PCon: 0,
             tempature: 0,
@@ -49,7 +50,7 @@ export default function Page(){
     }, [device.reports.length, deviceReport]);
     return(
         <div>
-            <h1>Report at {device.reports[deviceReport].createdAt}</h1>
+            <h1>Report at {device.reports[deviceReport].testTaken}</h1>
             <p>Chlorine Concentration: {device.reports[deviceReport].ClCon}</p>
             <p>Phospahe Concentration: {device.reports[deviceReport].PCon}</p>
             <p>tempature: {device.reports[deviceReport].tempature}</p>
