@@ -1,21 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-production
+  name: poolwatch
   namespace: {{ .Values.namespace }}
   labels:
-    app: mongo-production
+    app: poolwatch
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo-production
+      app: poolwatch
   template:
     metadata:
       namespace: {{ .Values.namespace }}
       labels:
-        app: mongo-production
+        app: poolwatch
     spec:
       containers:
-      - image: {{ .Values.mongodb.image }}
-        name: mongo-production
+      - image: {{ .Values.poolwatch.image }}
+        name: poolwatch
+        env:
+        - name: MONGOURL
+          value: {{ .Values.poolwatch.database }}

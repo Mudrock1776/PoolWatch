@@ -2,8 +2,8 @@ import socket
 import json
 import time
 
-HOST = 'localhost'
-PORT = 8080   
+HOST = 'test.skadi'
+PORT = 80   
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 with open("./jsonMessages/exist.json","r") as f:
@@ -19,7 +19,7 @@ with open("./jsonMessages/exist.json","r") as f:
         f"{body}"
     )
 
-client.connect(("localhost",8080))
+client.connect((HOST,PORT))
 print(msg+"\n")
 client.sendall(msg.encode())
 response = client.recv(1024).decode()
@@ -42,7 +42,7 @@ if not answer["answer"]:
             "\r\n"
             f"{body}"
         )
-    client.connect(("localhost",8080))
+    client.connect((HOST,PORT))
     print(msg+"\n")
     client.sendall(msg.encode())
     response = client.recv(1024).decode()
@@ -62,7 +62,7 @@ with open("./jsonMessages/report.json","r") as f:
         "\r\n"
         f"{body}"
     )
-client.connect(("localhost",8080))
+client.connect((HOST,PORT))
 print(msg+"\n")
 client.sendall(msg.encode())
 response = client.recv(1024).decode()
@@ -84,7 +84,7 @@ with open("./jsonMessages/report2.json","r") as f:
         "\r\n"
         f"{body}"
     )
-client.connect(("localhost",8080))
+client.connect((HOST,PORT))
 print(msg+"\n")
 client.sendall(msg.encode())
 response = client.recv(1024).decode()

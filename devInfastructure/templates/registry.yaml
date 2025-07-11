@@ -12,7 +12,7 @@ spec:
       app: registry
   template:
     metadata:
-      namespace: {{ .Values.namespace }}s
+      namespace: {{ .Values.namespace }}
       labels:
         app: registry
     spec:

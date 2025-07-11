@@ -1,0 +1,10 @@
+namespace: poolwatch
+
+poolwatch:
+  image: repo.skadi/poolwatch:0.0.1
+  hostname: test.skadi
+  database: mongodb://mongo-production-service.poolwatch.svc.cluster.local
+
+mongodb:
+  image: repo.skadi/mongo:6
+  storage: 2Gi
