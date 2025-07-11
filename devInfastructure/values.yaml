@@ -1,0 +1,7 @@
+namespace: dev-ops
+
+registry:
+  image: docker.io/registry:3.0
+  hostname: repo.skadi
+  storage: 20Gi
+  node: skadi
