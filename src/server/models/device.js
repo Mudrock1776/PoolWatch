@@ -10,6 +10,7 @@ const device = new Schema({
     pumpStatus: {type: Boolean, required: true},
     fiveRegulator: {type: Boolean, required: true},
     twelveRegulator: {type: Boolean, required: true},
+    needUpdate: {type: Boolean, required: true},
     sampleRate: {type: Number, min: 0, required: true},
     updateServers: {type: [notify]},
     reports: {type: [report]},

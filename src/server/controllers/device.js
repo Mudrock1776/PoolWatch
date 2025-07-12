@@ -31,6 +31,7 @@ exports.createDevice = async (req, res) => {
             pumpStatus: req.body.pumpStatus,
             fiveRegulator: req.body.fiveRegulator,
             twelveRegulator: req.body.twelveRegulator,
+            needUpdate: true, //should be false
             sampleRate: req.body.sampleRate,
             updateServers: [],
             reports: [],
@@ -66,15 +67,17 @@ exports.addReport = async (req, res) => {
 //status Update
 exports.statusUpdate = async (req, res) => {
     try {
-        await device.findOneAndUpdate({serialNumber: req.serialNumber},{
+        await device.findOneAndUpdate({serialNumber: req.body.serialNumber},{
             battery: req.body.battery,
             connected: true,
             pumpStatus: req.body.pumpStatus,
             fiveRegulator: req.body.fiveRegulator,
             twelveRegulator: req.body.twelveRegulator,
         });
-        res.status().send({
-            update: false
+        const modifiedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        res.status(200).send({
+            needUpdate: modifiedDevice.needUpdate,
+            sampleRate: modifiedDevice.sampleRate,
         });
     } catch(err){
         console.log(err);

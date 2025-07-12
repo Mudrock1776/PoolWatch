@@ -57,6 +57,7 @@ export default function Page(){
             <p>Battery: {device.battery}</p>
             {device.pumpStatus ? <p>pumpStatus: working</p>:<p>pumpStatus: failed</p>}
             {device.fiveRegulator ? <p>fiveRegulator: working</p>:<p>fiveRegulator: failed</p>}
+            {device.twelveRegulator ? <p>twelveRegulator: working</p>:<p>twelveRegulator: failed</p>}
             <p>sampleRate: {device.sampleRate}</p>
             <ul>
                 {listReports()}
