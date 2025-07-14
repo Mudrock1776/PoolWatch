@@ -143,7 +143,6 @@ exports.requestTest = async (req, res) => {
             searchedDevice.testParticulate = true;
         }
         searchedDevice.needUpdate = true;
-        console.log(searchedDevice);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send();
     } catch(err){
