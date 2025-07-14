@@ -1,0 +1,10 @@
+{
+    "serialNumber": 1,
+    "report": {
+        "ClCon": 0.2,
+        "PCon": 0.5,
+        "tempature": 420,
+        "particulateAmount": 3,
+        "particulateSize": "Small"
+    }
+}

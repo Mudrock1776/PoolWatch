@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-production
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: mongo-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-production
+  template:
+    metadata:
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: mongo-production
+    spec:
+      containers:
+      - image: {{ .Values.mongodb.image }}
+        name: mongo-production

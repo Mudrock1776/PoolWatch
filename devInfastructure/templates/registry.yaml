@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: registry
+    spec:
+      containers:
+      - image: {{ .Values.registry.image }}
+        name: registry
+        volumeMounts:
+          - mountPath: "/var/lib/registry"
+            name: pvc
+      volumes:
+        - name: pvc
+          persistentVolumeClaim:
+            claimName: registry-pvc
