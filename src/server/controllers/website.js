@@ -125,3 +125,29 @@ exports.deleteReport = async (req, res) => {
         res.status(400).send(err);
     }
 }
+
+//Request Test
+exports.requestTest = async (req, res) => {
+    try {
+        searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        if (req.body.testChlorine){
+            searchedDevice.testChlorine = true;
+        }
+        if (req.body.testPhosphate){
+            searchedDevice.testPhosphate = true;
+        }
+        if (req.body.testTempature){
+            searchedDevice.testTempature = true;
+        }
+        if (req.body.testParticulate){
+            searchedDevice.testParticulate = true;
+        }
+        searchedDevice.needUpdate = true;
+        console.log(searchedDevice);
+        await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
+        res.status(200).send();
+    } catch(err){
+        console.log(err);
+        res.status(400).send(err);
+    }
+}

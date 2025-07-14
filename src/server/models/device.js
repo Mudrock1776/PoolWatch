@@ -12,6 +12,10 @@ const device = new Schema({
     twelveRegulator: {type: Boolean, required: true},
     needUpdate: {type: Boolean, required: true},
     sampleRate: {type: Number, min: 0, required: true},
+    testChlorine: {type: Boolean, required: true},
+    testPhosphate: {type: Boolean, required: true},
+    testTempature: {type: Boolean, required: true},
+    testParticulate: {type: Boolean, required: true},
     updateServers: {type: [notify]},
     reports: {type: [report]},
 });

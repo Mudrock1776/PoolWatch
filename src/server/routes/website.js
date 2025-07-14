@@ -102,4 +102,16 @@ Routes.route("/report/delete").post((req,res)=>{
     website.deleteReport(req,res);
 });
 
+//Request Tests
+/* Takes in:
+    serialNumber: <serial number>,
+    testChlorine: <boolean>,
+    testPhosphate: <boolean>,
+    testTempature: <boolean>,
+    testParticulate: <boolean>,
+on success returns 200 */
+Routes.route("/test/request").post((req, res) => {
+    website.requestTest(req, res);
+})
+
 module.exports = Routes;

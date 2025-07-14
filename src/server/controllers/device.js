@@ -33,6 +33,10 @@ exports.createDevice = async (req, res) => {
             twelveRegulator: req.body.twelveRegulator,
             needUpdate: true, //should be false
             sampleRate: req.body.sampleRate,
+            testChlorine: false,
+            testPhosphate: false,
+            testTempature: false,
+            testParticulate: false,
             updateServers: [],
             reports: [],
         });
@@ -67,17 +71,26 @@ exports.addReport = async (req, res) => {
 //status Update
 exports.statusUpdate = async (req, res) => {
     try {
+        const modifiedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        res.status(200).send({
+            needUpdate: modifiedDevice.needUpdate,
+            sampleRate: modifiedDevice.sampleRate,
+            testChlorine: modifiedDevice.testChlorine,
+            testPhosphate: modifiedDevice.testPhosphate,
+            testTempature: modifiedDevice.testTempature,
+            testParticulate: modifiedDevice.testParticulate,
+        });
         await device.findOneAndUpdate({serialNumber: req.body.serialNumber},{
             battery: req.body.battery,
             connected: true,
             pumpStatus: req.body.pumpStatus,
             fiveRegulator: req.body.fiveRegulator,
             twelveRegulator: req.body.twelveRegulator,
-        });
-        const modifiedDevice = await device.findOne({serialNumber: req.body.serialNumber});
-        res.status(200).send({
-            needUpdate: modifiedDevice.needUpdate,
-            sampleRate: modifiedDevice.sampleRate,
+            needUpdate: false,
+            testChlorine: false,
+            testPhosphate: false,
+            testTempature: false,
+            testParticulate: false,
         });
     } catch(err){
         console.log(err);

@@ -44,6 +44,7 @@ Routes.route("/device/create").post((req,res) =>{
 {
     serialNumber: <serial number>,
     report: {
+        tempature: <tempature>,
         ClCon: <Chlorine Concentration>,
         PCon: <Phosphoric acid concentration>,
         particulateAmount: <amount of particulates>,
@@ -70,7 +71,12 @@ Routes.route("/report/add").post((req,res) => {
 }
 on success returns 200:
 {
-    update: <update status>
+    needUpdate: <update status>
+    sampleRate: <sample rate>,
+    testChlorine: <boolean>,
+    testPhosphate: <boolean>,
+    testTempature: <boolean>,
+    testParticulate: <boolean>,
 }*/
 Routes.route("/status/update").post((req,res) => {
     device.statusUpdate(req,res);

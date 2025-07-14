@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState, MouseEvent } from "react";
 import { redirect } from 'next/navigation';
 
 export default function Page(){
@@ -40,6 +40,41 @@ export default function Page(){
         redirect("/main/report");
     }
 
+    async function requestTest(e:MouseEvent<HTMLButtonElement>, test:String) {
+        e.preventDefault();
+        var Chlorine = false;
+        var Phosphate = false;
+        var Tempature = false;
+        var Particulate = false;
+        switch (test) {
+            case "Chlorine":
+                Chlorine = true;
+                break;
+            case "Phoshate":
+                Phosphate = true;
+                break;
+            case "Tempature":
+                Tempature = true;
+                break;
+            case "Particulate":
+                Particulate = true;
+                break;
+        }
+        const res = await fetch("/test/request", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                serialNumber: sessionStorage.getItem("serial"),
+                testChlorine: Chlorine,
+                testPhosphate: Phosphate,
+                testTempature: Tempature,
+                testParticulate: Particulate
+            })
+        });
+    }
+
     function listReports(){
         var index = -1;
         return(device.reports.map((item:any) => {
@@ -59,6 +94,10 @@ export default function Page(){
             {device.fiveRegulator ? <p>fiveRegulator: working</p>:<p>fiveRegulator: failed</p>}
             {device.twelveRegulator ? <p>twelveRegulator: working</p>:<p>twelveRegulator: failed</p>}
             <p>sampleRate: {device.sampleRate}</p>
+            <button onClick={(e)=>{requestTest(e, "Chlorine")}}>Test Chlorine</button>
+            <button onClick={(e)=>{requestTest(e, "Phoshate")}}>Test Phosphate</button>
+            <button onClick={(e)=>{requestTest(e, "Tempature")}}>Test Tempature</button>
+            <button onClick={(e)=>{requestTest(e, "Particulate")}}>Test Particulate</button>
             <ul>
                 {listReports()}
             </ul>
