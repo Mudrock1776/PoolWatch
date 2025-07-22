@@ -31,7 +31,7 @@ exports.createDevice = async (req, res) => {
             pumpStatus: req.body.pumpStatus,
             fiveRegulator: req.body.fiveRegulator,
             twelveRegulator: req.body.twelveRegulator,
-            needUpdate: true, //should be false
+            needUpdate: false, //should be false
             sampleRate: req.body.sampleRate,
             testChlorine: false,
             testPhosphate: false,
