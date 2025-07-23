@@ -1,12 +1,6 @@
 #ifndef POOL_WATCH_WEB_DRIVERS_H
 #define POOL_WATCH_WEB_DRIVERS_H
 
-// private char *ssid;
-// private char *password;
-// private char *host;
-// private int port;
-// private int serialNumber;
-
 class webserver{
   private:
     char *ssid;
