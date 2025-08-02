@@ -2,7 +2,7 @@ import socket
 import json
 import time
 
-HOST = 'test.skadi'
+HOST = 'device.skadi'
 PORT = 80   
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

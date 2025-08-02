@@ -18,7 +18,13 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
+  tls:
+  - hosts:
+    - {{ .Values.registry.hostname }}
+    secretName: {{ .Values.registry.tlsSecret }}
   rules:
   - host: {{ .Values.registry.hostname }}
     http:
