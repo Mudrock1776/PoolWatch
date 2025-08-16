@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from 'next'
+import './global.css'
 
 export const metadata: Metadata = {
   title: 'PoolWatch',
