@@ -2,7 +2,7 @@ import socket
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server.bind(('',8080))
+server.bind(('',8081))
 
 server.listen()
 while True:
