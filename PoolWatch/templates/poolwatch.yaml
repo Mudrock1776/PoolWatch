@@ -22,3 +22,18 @@ spec:
         env:
         - name: MONGOURL
           value: {{ .Values.poolwatch.database }}
+        - name: EMAILPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.emailSecret }}
+              key: EMAILPASSWORD
+        - name: EMAILSERVICE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.emailSecret }}
+              key: EMAILSERVICE
+        - name: EMAILUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.emailSecret }}
+              key: EMAILUSERNAME
