@@ -32,7 +32,6 @@ export default function Page(){
         if (tokenString == null){
             redirect("/");
         }
-        console.log(device.reports)
     }, [device.reports.length])
 
     function reportRedirect(index:Number){
@@ -88,6 +87,7 @@ export default function Page(){
     return(
         <div>
             <h1>Device #{device.serialNumber}</h1>
+            <p onClick={(e)=>{redirect("/main/device/settings")}}>Settings</p>
             {device.connected ? <p>connected</p>:<p>disconnected</p>}
             <p>Battery: {device.battery}</p>
             {device.pumpStatus ? <p>pumpStatus: working</p>:<p>pumpStatus: failed</p>}

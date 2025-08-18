@@ -104,8 +104,8 @@ exports.addReport = async (req, res) => {
             const updateRequest = searchedDevice.updateServers[i];
             const logic = updateRequest.when.replace(/ /g, "");
             let variable = "";
+            let n = 0
             try {
-                let n = 0
                 while (true){
                     if (logic[n] == '<' || logic[n] == '>' || logic[n] == '='){
                         break

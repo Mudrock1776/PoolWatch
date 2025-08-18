@@ -156,7 +156,7 @@ exports.addUpdateServer = async (req, res) =>{
     try {
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
         var newUpdateServer = req.body.updateServer;
-        searchedDevice.updateServer.push(newUpdateServer);
+        searchedDevice.updateServers.push(newUpdateServer);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send();
     } catch(err){
