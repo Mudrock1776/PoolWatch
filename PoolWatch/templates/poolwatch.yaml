@@ -16,6 +16,11 @@ spec:
       labels:
         app: poolwatch
     spec:
+      hostAliases:
+      - ip: "173.194.217.109"
+        hostnames:
+        - "smtp.gmail.com"
+        - "smtp.gmail.com.lan"
       containers:
       - image: {{ .Values.poolwatch.image }}
         name: poolwatch
