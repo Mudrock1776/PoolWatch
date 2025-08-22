@@ -1,6 +1,44 @@
 const device = require("../models/device");
 const report = require("../models/report");
+const updateServer = require("../models/notify");
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    service: process.env.EMAILSERVICE,
+    auth: {
+        user: process.env.EMAILUSERNAME,
+        pass: process.env.EMAILPASSWORD
+    }
+});
+
+function sendEmial(to, subj, msg){
+    const mailOptions = {
+        from: process.env.EMAILUSERNAME,
+        to: to,
+        subject: subj,
+        text: msg
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error){
+            console.log(error);
+        }
+    });
+}
+
+function sendHTTP(to, msg){
+    try {
+        fetch(to, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: msg
+        })
+    } catch(err){
+        console.log(err)
+    }
+}
 
 //Devices
 //Exist
@@ -62,6 +100,101 @@ exports.addReport = async (req, res) => {
         res.status(200).send({
             update: false
         });
+        for (let i=0; i<searchedDevice.updateServers.length; i++){
+            const updateRequest = searchedDevice.updateServers[i];
+            const logic = updateRequest.when.replace(/ /g, "");
+            let variable = "";
+            let n = 0
+            try {
+                while (true){
+                    if (logic[n] == '<' || logic[n] == '>' || logic[n] == '='){
+                        break
+                    }
+                    variable = variable + logic[n];
+                    n = n+1;
+                }
+            } catch (err) {
+                console.log(err);
+            }
+            let sign = logic[n]
+            n = n+1;
+            if (logic[n] == '<' || logic[n] == '>' || logic[n] == '=') {
+                sign = sign + logic[n];
+                n = n+1;
+            }
+            let threshold = "";
+            while(n < logic.length){
+                threshold = threshold + logic[n];
+                n = n+1;
+            }
+            let value;
+            switch (variable){
+                case "TEMP":
+                    value = newReport.tempature;
+                    threshold = Number(threshold);
+                    if (value < 0){
+                        return;
+                    }
+                    break;
+                case "CLCON":
+                    value = newReport.ClCon;
+                    threshold = Number(threshold);
+                    if (value < 0){
+                        return;
+                    }
+                    break;
+                case "PCON":
+                    value = newReport.PCon;
+                    threshold = Number(threshold);
+                    if (value < 0){
+                        return;
+                    }
+                    break;
+                case "PARTA":
+                    value = newReport.particulateAmount;
+                    threshold = Number(threshold);
+                    if (value < 0){
+                        return;
+                    }
+                    break;
+                case "PARTS":
+                    value = newReport.particulateSize;
+                    if (value < 0){
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+            let condition = false;
+            switch(sign){
+                case "=":
+                    condition = (value == threshold);
+                    break;
+                case "<":
+                    condition = (value < threshold);
+                    break;
+                case ">":
+                    condition = (value > threshold);
+                    break;
+                case "<=":
+                    condition = (value <= threshold);
+                    break;
+                case ">=":
+                    condition = (value >= threshold);
+                    break;
+            }
+            if (condition){
+                switch(updateRequest.type){
+                    case "email":
+                        sendEmial(updateRequest.server, "Condition Succeded", logic);
+                        break;
+                    case "webserver":
+                        sendHTTP(updateRequest.server, logic);
+                        break;
+                }
+            }
+        }
     } catch(err){
         console.log(err);
         res.status(400).send(err);

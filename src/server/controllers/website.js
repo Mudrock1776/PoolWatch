@@ -150,3 +150,30 @@ exports.requestTest = async (req, res) => {
         res.status(400).send(err);
     }
 }
+
+//Add Update Request
+exports.addUpdateServer = async (req, res) =>{
+    try {
+        searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        var newUpdateServer = req.body.updateServer;
+        searchedDevice.updateServers.push(newUpdateServer);
+        await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
+        res.status(200).send();
+    } catch(err){
+        console.log(err);
+        res.status(400).send(err);
+    }
+}
+
+//Remove Update Request
+exports.removeUpdateServer = async (req, res) =>{
+    try {
+        searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        await searchedDevice.updateServer.splice(req.body.index);
+        device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
+        res.status(200).send();
+    } catch(err){
+        console.log(err);
+        res.status(400).send(err);
+    }
+}

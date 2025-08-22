@@ -112,6 +112,28 @@ Routes.route("/report/delete").post((req,res)=>{
 on success returns 200 */
 Routes.route("/test/request").post((req, res) => {
     website.requestTest(req, res);
-})
+});
+
+//Update Server Add
+/* Takes in:
+    serialNumber: <serial number>,
+    updateServer: {
+        type: <email or webserver>,
+        server: <location of server>,
+        when: <logic of when to update>
+    }
+on success returns 200 */
+Routes.route("/notify/add").post((req, res) => {
+    website.addUpdateServer(req,res);
+});
+
+//Update Server removal
+/* Takes in:
+    serialNumber: <serial number>,
+    index: <index of entry>
+on success returns 200 */
+Routes.route("/notify/remove").post((req, res) => {
+    website.removeUpdateServer(req,res);
+});
 
 module.exports = Routes;
