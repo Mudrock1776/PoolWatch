@@ -1,6 +1,7 @@
 'use client';
 import { MouseEvent, useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
+import TopMenu from "./ui/TopMenu";
 
 export default function Page(){
     const [devices, setDevices] = useState<any[]>([]);
@@ -68,6 +69,7 @@ export default function Page(){
 
     return(
         <div>
+            <TopMenu />
             <h1>Main</h1>
             <form>
                 <label>Serial Number:</label><input type="number" value={serialNumberForm} onChange={(e) => setSerialNumberForm(parseInt(e.target.value))}/><button onClick={(e)=>{onsubmit(e)}}>Add Device</button>
