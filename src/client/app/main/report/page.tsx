@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
+import TopMenu from "../ui/TopMenu";
 export default function Page(){
     const [device, setDevice] = useState({
         serialNumber: 0,
@@ -50,12 +51,15 @@ export default function Page(){
     }, [device.reports.length, deviceReport]);
     return(
         <div>
-            <h1>Report at {device.reports[deviceReport].testTaken}</h1>
-            <p>Chlorine Concentration: {device.reports[deviceReport].ClCon}</p>
-            <p>Phospahe Concentration: {device.reports[deviceReport].PCon}</p>
-            <p>tempature: {device.reports[deviceReport].tempature}</p>
-            <p>Particulate Amount: {device.reports[deviceReport].particulateAmount}</p>
-            <p>Particulate Size: {device.reports[deviceReport].particulateSize}</p>
+            <TopMenu serialNumber={device.serialNumber} testTaken={device.reports[deviceReport].testTaken}/>
+            <div className="ml-6 mt-2">
+                <h1 className="text-white underline text-xl">Results</h1>
+                <p className="text-white">Chlorine Concentration: {device.reports[deviceReport].ClCon}</p>
+                <p className="text-white">Phospahe Concentration: {device.reports[deviceReport].PCon}</p>
+                <p className="text-white">tempature: {device.reports[deviceReport].tempature}</p>
+                <p className="text-white">Particulate Amount: {device.reports[deviceReport].particulateAmount}</p>
+                <p className="text-white">Particulate Size: {device.reports[deviceReport].particulateSize}</p>
+            </div>
         </div>
     )
 }

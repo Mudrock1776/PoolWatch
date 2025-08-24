@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, MouseEvent } from "react";
 import { redirect } from 'next/navigation';
+import TopMenu from "../ui/TopMenu";
 
 export default function Page(){
     const [device, setDevice] = useState({
@@ -86,6 +87,7 @@ export default function Page(){
     }
     return(
         <div>
+            <TopMenu/>
             <h1>Device #{device.serialNumber}</h1>
             <p onClick={(e)=>{redirect("/main/device/settings")}}>Settings</p>
             {device.connected ? <p>connected</p>:<p>disconnected</p>}
