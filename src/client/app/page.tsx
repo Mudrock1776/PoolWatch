@@ -25,6 +25,28 @@ export default function Home() {
     }
   });
 
+  // Approach: Once server restarts, verify the token is valid with the server. If not, remove the token.
+  async function initializetoken() {
+    const pwtoken = localStorage.getItem("PoolWatchtoken");
+
+    if (pwtoken) {
+      try {
+      const res = await fetch("/account/login", {
+        headers: { Authorization: `Bearer ${pwtoken}`}
+      });
+
+      if (!res.ok) {
+        // invalid token will be removed
+        localStorage.removeItem("PoolWatchtoken");
+      }
+    } catch (err) {
+        // provide a message on the backend indicating an error has occured 
+      console.error("Error validating token:", err);
+      localStorage.removeItem("PoolWatchtoken")
+    }
+  } 
+}  
+
   async function onsubmit(e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) {
     e.preventDefault();
     const formRequest = {...form};
