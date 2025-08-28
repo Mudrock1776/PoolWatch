@@ -22,6 +22,19 @@ export default function TopMenu(props:any){
         redirect("/");
     }
     async function deleteReport() {
+        const res = await fetch("/device/remove", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: sessionStorage.getItem("PoolWatchtoken"),
+                serialNumber: sessionStorage.getItem("serial")
+            })
+        });
+        mainMenu();
+    }
+    async function removeDevice() {
         const res = await fetch("/report/delete", {
             method: "POST",
             headers: {
@@ -36,6 +49,13 @@ export default function TopMenu(props:any){
     }
     function leftMenu(){
         if (pathname == "/main/report"){
+            return(
+                <div className="flex lg:flex-1 lg:gap-x-12">
+                    <p onClick={(e)=>mainMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Home</p>
+                    <p onClick={(e)=>deviceMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Device #{serialNumber}</p>
+                </div>
+            )
+        } else if (pathname == "/main/device/settings") {
             return(
                 <div className="flex lg:flex-1 lg:gap-x-12">
                     <p onClick={(e)=>mainMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Home</p>
@@ -70,6 +90,13 @@ export default function TopMenu(props:any){
             return(
                 <div className="lg:flex lg:flex-1 lg:gap-x-12 lg:justify-end">
                     <p onClick={(e)=>deleteReport()} className="text-sm/6 font-semibold text-white">Delete</p>
+                    <p onClick={(e)=>logOut()} className="text-sm/6 font-semibold text-white">Log Out</p>
+                </div>
+            )
+        } else if (pathname == "/main/device/settings"){
+            return(
+                <div className="lg:flex lg:flex-1 lg:gap-x-12 lg:justify-end">
+                    <p onClick={(e)=>removeDevice()} className="text-sm/6 font-semibold text-white">Remove Device</p>
                     <p onClick={(e)=>logOut()} className="text-sm/6 font-semibold text-white">Log Out</p>
                 </div>
             )
