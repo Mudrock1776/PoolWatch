@@ -108,7 +108,8 @@ export default function Page(){
             setForm({
                 type: "email",
                 server: "",
-                when: ""
+                when: "",
+                sampleRate: form.sampleRate
             });
             const res2 = await fetch("/device/fetch", {
                 method: "POST",
