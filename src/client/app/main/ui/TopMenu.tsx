@@ -1,7 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import { redirect } from 'next/navigation';
-import { useEffect, useState, } from 'react';
 
 export default function TopMenu(props:any){
     const pathname = usePathname();
@@ -22,30 +21,30 @@ export default function TopMenu(props:any){
         redirect("/");
     }
     async function deleteReport() {
-        const res = await fetch("/device/remove", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: sessionStorage.getItem("PoolWatchtoken"),
-                serialNumber: sessionStorage.getItem("serial")
-            })
-        });
-        mainMenu();
-    }
-    async function removeDevice() {
         const res = await fetch("/report/delete", {
             method: "POST",
             headers: {
             "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                serialNumber: sessionStorage.getItem("serial"),
-                index: sessionStorage.getItem("reportIndex")
+                index: sessionStorage.getItem("reportIndex"),
+                serialNumber: sessionStorage.getItem("serial")
             })
         });
         deviceMenu();
+    }
+    async function removeDevice() {
+        const res = await fetch("/device/remove", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: localStorage.getItem("PoolWatchtoken"),
+                serialNumber: sessionStorage.getItem("serial")
+            })
+        });
+        mainMenu();
     }
     function leftMenu(){
         if (pathname == "/main/report"){
