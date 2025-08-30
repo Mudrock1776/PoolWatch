@@ -9,6 +9,7 @@ poolwatch:
 
 mongodb:
   image: repo.skadi/mongo:6
-  storage: 2Gi
+  storage: 10Gi
+  node: skadi
 
 emailSecret: emailcred

@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  EMAILPASSWORD: bXd2biBtdmZjIGhxb24gcWdrYg==
+  EMAILSERVICE: Z21haWw=
+  EMAILUSERNAME: c2VuaW9yZGVzaWduMjAyNWdyb3VwNEBnbWFpbC5jb20=
+kind: Secret
+metadata:
+  name: emailcred
+  namespace: poolwatch
+type: Opaque

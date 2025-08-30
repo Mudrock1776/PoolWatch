@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodb-pv
+  namespace: {{ .Values.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.mongodb.storage }}
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: mongodb-storage
+  local:
+    path: /mnt/mongo
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - {{ .Values.mongodb.node }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.mongodb.storage }}
+  storageClassName: mongodb-storage
+  volumeName: mongodb-pv
