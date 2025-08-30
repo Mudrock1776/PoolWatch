@@ -1,6 +1,7 @@
 const account = require("../models/account");
 const device = require("../models/device");
 const mongoose = require("mongoose");
+const { searchIndex } = require("../models/notify");
 
 //acounts
 //Create account
@@ -69,9 +70,13 @@ exports.addDevice = async (req, res) => {
 //Remove Device
 exports.removeDevice = async (req, res) => {
     try {
-        oldAccount = await account.findById(req.body.id);
+        var oldAccount = await account.findById(req.body.id)
         if (oldAccount.devices.includes(req.body.serialNumber)) {
-            oldAccount.devices = oldAccount.devices.filter(item => item !== req.body.serialNumber);
+            oldAccount.devices = oldAccount.devices.filter(item => {
+                if (item != req.body.serialNumber){
+                    return item
+                }
+            });
             await account.findByIdAndUpdate(req.body.id, oldAccount);
             res.status(200).send();
         } else { //This proably isn't needed
@@ -151,6 +156,20 @@ exports.requestTest = async (req, res) => {
     }
 }
 
+//Update SampleRate
+exports.updateRate = async (req, res) => {
+    try {
+        searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        searchedDevice.sampleRate = req.body.sampleRate;
+        searchedDevice.needUpdate = true;
+        await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
+        res.status(200).send();
+    } catch(err){
+        console.log(err);
+        res.status(400).send(err);
+    }
+}
+
 //Add Update Request
 exports.addUpdateServer = async (req, res) =>{
     try {
@@ -169,9 +188,9 @@ exports.addUpdateServer = async (req, res) =>{
 exports.removeUpdateServer = async (req, res) =>{
     try {
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
-        await searchedDevice.updateServer.splice(req.body.index);
-        device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
-        res.status(200).send();
+        searchedDevice.updateServers.splice(req.body.index, 1);
+        await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
+        res.status(200).send(searchedDevice);
     } catch(err){
         console.log(err);
         res.status(400).send(err);

@@ -91,6 +91,17 @@ Routes.route("/device/fetch").post((req,res)=>{
     website.fetchDevice(req,res);
 });
 
+//Update Sample Rate
+/* Takes in:
+{
+    serialNumber: <serial number>,
+    sampleRate: <New Sample Rate>
+}
+on success returns 200: Device */
+Routes.route("/device/sample").post((req,res)=>{
+    website.updateRate(req,res);
+});
+
 //Delete Report
 /* Takes in:
 {
@@ -131,7 +142,7 @@ Routes.route("/notify/add").post((req, res) => {
 /* Takes in:
     serialNumber: <serial number>,
     index: <index of entry>
-on success returns 200 */
+on success returns 200 and the updated device */
 Routes.route("/notify/remove").post((req, res) => {
     website.removeUpdateServer(req,res);
 });
