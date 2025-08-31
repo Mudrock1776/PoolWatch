@@ -19,3 +19,10 @@ spec:
       containers:
       - image: {{ .Values.mongodb.image }}
         name: mongo-production
+        volumeMounts:
+          - mountPath: "/data/db"
+            name: pvc
+      volumes:
+        - name: pvc
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
