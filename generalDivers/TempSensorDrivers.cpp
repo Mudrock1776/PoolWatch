@@ -2,7 +2,6 @@
 
 TemperatureSensor::TemperatureSensor(int pin) 
     : oneWire(pin), sensors(&oneWire) {
-    // constructor just sets up objects
 }
 
 void TemperatureSensor::begin() {
