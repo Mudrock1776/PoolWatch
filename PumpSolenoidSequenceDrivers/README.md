@@ -1,19 +1,21 @@
-## Pump and Solenoid arduino drivers for PoolWatch ##
+## Relay drivers for PoolWatch ##
 
 #### Installations ####
-To install driver copy PumpSolenoidSequence.h and PumpSolenoidSequence.cpp into sketch folder and include "PumpSolenoidSequence.h" in your .ino file.
+To install driver copy relayTest.h and Relay.cpp into sketch folder and include "Relay.h" in your .ino file.
 
 #### Setting GPIO Pins ####
-To configure ESP32 GPIO pins for relays, use output-capable pins. In your .ino file, pass the selected pins to the class constructors.
+To configure ESP32 GPIO pins for relays, use output-capable pins. Four channels are predefined for this project in the .h file and each channel number maps 
+to a predefined ESP32 GPIO pin. Change as needed. The relay number to be used for component is passed to the constructor which automatically maps relay number to predefined pins, 
+sets the pin to LOW to prevent accidental turn on during boot/reset, and configures the pin as an OUTPUT with pinMode().
 
-Initialize the pins by using the function PumpSolenoidSequence.begin() on your Pump and Solenoid objects. The function PumpSolenoidSequence.begin() keeps each pin OFF initially using digitalWrite(...) and then sets it as an OUTPUT with pinModefrom the Arduino library.
+#### Relay ####
+Relays used are Normally Open (NO) and active-HIGH trigger. Writing HIGH turns the relay ON and writing LOW turns the relay OFF.
+Each pump, solenoid, or stirrer used in the project has its own dedicated relay. Non-blocking functions are used to allow for multitasking. 
 
-#### PumpRelay ####
-To run the water pump, use the function PumpSolenoidSequence.pumpRelay. This function turns the relay module connected to the pump on for 5 seconds and then turns it off. 
+turnOnFor(unsigned long ms) turns the relay on for the specified time given in milliseconds. 
 
-The delays set in the function can be adjusted to increase or decrease running time of pump. 
+turnOff() function immediately turns the relay off. 
 
-#### Solenoid Relay ####
-To run the solenoid valves, use the function PumpSolenoidSequence.solenoidRelay. This function turns the relay module connected to a solenoid valve on for 1 second and then turns it off. 
+update() function checks whether the relay’s ON duration has expired. It is called inside the loop() to keep timing accurate.
 
-The delays set in the function can be adjusted to increase or decrease running time of solenoid valves.  
+state() function returns the current state of the relay pin (HIGH = ON, LOW = OFF).
