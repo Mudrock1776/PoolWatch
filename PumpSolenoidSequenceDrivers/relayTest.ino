@@ -6,10 +6,10 @@ unsigned long solenoidMs = 2000;  // 2s
 unsigned long stirrerMs = 3000;  // 3s
 
 //Setting pins 
-Relay pump(1);
-Relay stirrer(2);
-Relay solenoid1(3);
-Relay solenoid2(4);
+Relay pump(RELAY1PIN);
+Relay stirrer(RELAY2PIN);
+Relay solenoid1(RELAY3PIN);
+Relay solenoid2(RELAY4PIN);
 
 bool pumpStarted = false;
 bool stirStarted = false;
@@ -22,7 +22,13 @@ void setup() {
     Serial.begin(115200);
     delay(2000);
   }
+  
+  pump.setPins(); 
+  stirrer.setPins(); 
+  solenoid1.setPins();
+  solenoid2.setPins(); 
 
+  //turn on pump first 
   pump.turnOnFor(pumpMs);
   pumpStarted = true;
 
