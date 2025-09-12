@@ -11,18 +11,20 @@
 
 class Relay {
  public:
-  Relay(int relayNum);                          
-  void turnOnFor(unsigned long ms);   
+  Relay(uint8_t relayNum); 
+  void setPins(); 
+  void turnOnFor(uint32_t ms);   
   void turnOff();   
   void update();                           
   int  state();   
  private:
   int relayPin;
-  int relayState = LOW;
-  bool onScheduled = false; //checks if relay on timed run
-  unsigned long startTime = 0;
-  unsigned long duration = 0;
+  int relayState;
+  bool onScheduled; //checks if relay on timed run
+  unsigned long startTime;
+  unsigned long duration;
 };
 
 extern bool DEBUG;
 #endif
+
