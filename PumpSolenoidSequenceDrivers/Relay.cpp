@@ -2,19 +2,18 @@
 
 bool DEBUG = true;
 
-//Constructor
-//Sets pin as output at the same time 
-//keeps pin in off mode intially 
-Relay::Relay(int relayNum) {
-  if (relayNum == 1) relayPin = RELAY1PIN;
-  if (relayNum == 2) relayPin = RELAY2PIN;
-  if (relayNum == 3) relayPin = RELAY3PIN;
-  if (relayNum == 4) relayPin = RELAY4PIN;
+Relay::Relay(uint8_t relayNum) {
+   relayPin = relayNum; 
+}
 
-//Sets a GPIO pin to LOW
-//to prevent short turn on during reset and power up sequence
-  digitalWrite(relayPin, LOW);
+//Configures GPIO pins 
+void Relay::setPins(){
   pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);
+  startTime = 0;
+  duration = 0;
+  onScheduled = false;
+  relayState = LOW;
 }
 
 // Returns state of the relay (LOW or HIGH)
@@ -63,3 +62,4 @@ void Relay::update() {
     turnOff();
   }
 }
+
