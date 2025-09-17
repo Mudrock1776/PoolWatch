@@ -42,7 +42,7 @@ npm run clean
 
 Please note that you will need a MongoDB server running for the webiste to work. There are several options to do this, but I reccomend using podman or docker to start up an instance with the following command:
 ```
-podman run -p 27017:27017 mongo:6
+podman run --rm -p 27017:27017 mongo:6
 ```
 
 It is the same command id Docker just replace podman with Docker (Podman is linux only btw).
