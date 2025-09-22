@@ -3,7 +3,8 @@
 LEDDriver chlorineLED(CL_PIN);  
 LEDDriver phosphateLED(P_PIN); 
 
-uint32_t timer = 5000;  // how long LED should stay on
+uint32_t startTime = 0;
+bool ledsOn = false;
 
 void setup() {
   if (DEBUG)
@@ -14,11 +15,16 @@ void setup() {
   chlorineLED.begin();
   phosphateLED.begin();
 
-  chlorineLED.turnON(timer);
-  phosphateLED.turnON(timer);
+  chlorineLED.on();
+  phosphateLED.on();
+  ledsOn = true;
+  startTime = millis();  //track when LEDs turned on 
 }
 
 void loop() {
-  chlorineLED.update();
-  phosphateLED.update();
+  if (ledsOn && (millis() - startTime >= 5000)) {
+    chlorineLED.off();
+    phosphateLED.off();
+    ledsOn = false; 
+  }
 }
