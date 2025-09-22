@@ -9,15 +9,12 @@ class LEDDriver
 {
 	public:
 		LEDDriver(uint8_t LEDpin);
-		void turnON(uint32_t duration);
-    void update(); 
-    void begin(); 
+    	void begin(); 
+		void on();
+    	void off(); 
   
-  private:
+    private:
 		uint8_t _ledPin;
-		uint32_t onTime; //(ms)
-    uint32_t Start; //(ms)
-    bool isOn; 
 		
 };
 extern bool DEBUG;
