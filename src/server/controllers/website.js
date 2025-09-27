@@ -51,14 +51,16 @@ exports.login = async (req, res) => {
 //Add Device
 exports.addDevice = async (req, res) => {
     try {
-        oldAccount = await account.findById(req.body.id);
-        if (oldAccount.devices.includes(req.body.serialNumber)) {
-            res.status(403).send({
-                err: "Device already added"
+        const oldAccount = await account.findById(req.body.id); 
+        const serial = Number(req.body.serialNumber); 
+        if (oldAccount.devices.includes(serial)) {   
+            res.status(403).send({  
+                err: "Device already added"  
             });
-        } else {
-            oldAccount.devices.push(req.body.serialNumber);
-            await account.findByIdAndUpdate(req.body.id, oldAccount);
+        } else { 
+            await device.create({ serialNumber: serial }); //create device with serial 
+            oldAccount.devices.push(serial); //add serial to array in account 
+            await oldAccount.save();
             res.status(200).send();
         }
     } catch(err){
@@ -71,13 +73,15 @@ exports.addDevice = async (req, res) => {
 exports.removeDevice = async (req, res) => {
     try {
         var oldAccount = await account.findById(req.body.id)
-        if (oldAccount.devices.includes(req.body.serialNumber)) {
+        const serial = Number(req.body.serialNumber); 
+        if (oldAccount.devices.includes(serial)) {
             oldAccount.devices = oldAccount.devices.filter(item => {
-                if (item != req.body.serialNumber){
+                if (item != serial){
                     return item
                 }
             });
-            await account.findByIdAndUpdate(req.body.id, oldAccount);
+            await account.findByIdAndUpdate(req.body.id, oldAccount); //update account 
+            await device.deleteOne({ serialNumber: serial}); //delete from device 
             res.status(200).send();
         } else { //This proably isn't needed
             res.status(403).send({
