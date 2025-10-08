@@ -45,7 +45,7 @@ export default function DashboardPage() {
       body: JSON.stringify({ id: tokenString })
     });
     const data = await res.json();
-    setDevices(Array.isArray(data) ? data.filter((device: any) => device && device.serialNumber != null) : []);
+    setDevices(Array.isArray(data) ? data : []);
   }
 
   async function onsubmit(e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) {
@@ -82,7 +82,10 @@ export default function DashboardPage() {
     redirect("/main/device");
   }
 
- const selectedDevice = devices?.find(device => device && device.serialNumber == selectedSerial) ?? null;
+ const selectedDevice =
+  selectedSerial == null
+    ? null
+    : devices?.find(device => device.serialNumber == selectedSerial) ?? null;
 
   const latestReport =
     selectedDevice && Array.isArray(selectedDevice.reports) && selectedDevice.reports.length > 0
@@ -140,8 +143,7 @@ export default function DashboardPage() {
                     onChange={(e) => setSelectedSerial(Number(e.target.value))}
                   >
                     {!devices.length && <option value="">No devices yet</option>}
-                    {devices.filter(device => device && device.serialNumber != null)
-                    .map((device) => (
+                    {devices.map((device) => (
                       <option key={device.serialNumber} value={device.serialNumber}>
                         Serial #{device.serialNumber} {device.connected ? '(Online)' : '(Offline)'}
                       </option>
