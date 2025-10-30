@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 export default function TopMenu(props:any){
     const pathname = usePathname();
-    const {serialNumber, testTaken} = props;
+    const { serialNumber, testTaken, onToggleSidebar } = props;
     function mainMenu(){
         sessionStorage.removeItem("serial");
         sessionStorage.removeItem("reportIndex");
@@ -107,13 +107,18 @@ export default function TopMenu(props:any){
             )
         }
     }
-    return(
-        <header className="bg-gray-900">
-            <nav aria-label="Global" className="flex max-w-8xl items-center justify-start p-6 lg:px-8">
-                {leftMenu()}
-                {middleMenu()}
-                {rightMenu()}
-            </nav>
-        </header>
-    );
+    return (
+    <header className="bg-gray-600 sticky top-0 h-16 z-40">
+      <nav aria-label="Global" className="flex max-w-8xl items-center justify-start px-6 lg:px-8 h-16">
+        {onToggleSidebar && <button onClick={onToggleSidebar} className="p-2 mr-4 rounded-md bg-gray-100 hover:bg-gray-200 shadow" aria-label="Toggle sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>}
+        {leftMenu()}
+        {middleMenu()}
+        {rightMenu()}
+      </nav>
+    </header>
+  );
 }
