@@ -51,17 +51,22 @@ exports.login = async (req, res) => {
 //Add Device
 exports.addDevice = async (req, res) => {
     try {
-        oldAccount = await account.findById(req.body.id);
-        if (oldAccount.devices.includes(req.body.serialNumber)) {
-            res.status(403).send({
-                err: "Device already added"
+        const oldAccount = await account.findById(req.body.id); 
+        const serial = Number(req.body.serialNumber); 
+        if (oldAccount.devices.includes(serial)) {   
+            res.status(403).send({  
+                err: "Device already added"  
             });
-        } else {
-            oldAccount.devices.push(req.body.serialNumber);
-            await account.findByIdAndUpdate(req.body.id, oldAccount);
+        } else { 
+            await device.create({ serialNumber: serial }); 
+            oldAccount.devices.push(req.body.serialNumber); 
+            await oldAccount.save();
             res.status(200).send();
         }
     } catch(err){
+        if (err.code === 11000) { //duplication error code for mongodb
+            res.status(409).send();
+        }
         console.log(err);
         res.status(400).send(err);
     }
@@ -71,13 +76,15 @@ exports.addDevice = async (req, res) => {
 exports.removeDevice = async (req, res) => {
     try {
         var oldAccount = await account.findById(req.body.id)
-        if (oldAccount.devices.includes(req.body.serialNumber)) {
+        const serial = Number(req.body.serialNumber); 
+        if (oldAccount.devices.includes(serial)) {
             oldAccount.devices = oldAccount.devices.filter(item => {
-                if (item != req.body.serialNumber){
+                if (item != serial){
                     return item
                 }
             });
-            await account.findByIdAndUpdate(req.body.id, oldAccount);
+            await account.findByIdAndUpdate(req.body.id, oldAccount); 
+            await device.deleteOne({ serialNumber: serial}); 
             res.status(200).send();
         } else { //This proably isn't needed
             res.status(403).send({
