@@ -1,11 +1,12 @@
 namespace: poolwatch
 
 poolwatch:
-  image: repo.skadi/poolwatch:0.6.0
+  image: repo.skadi/poolwatch:1.0.1
   hostname: test.skadi
   deviceHostname: device.skadi
   database: mongodb://mongo-production-service.poolwatch.svc.cluster.local
   tlsSecret: skaditls-secret
+  dcTimeout: 60000
 
 mongodb:
   image: repo.skadi/mongo:6
