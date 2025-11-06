@@ -28,12 +28,18 @@ export default function Page(){
             });
             setDevice(await res.json());
         }
-        getDevice();
         const tokenString = localStorage.getItem("PoolWatchtoken");
         if (tokenString == null){
             redirect("/");
         }
-    }, [device.reports.length])
+        getDevice();
+        const updateInterval = setInterval(() => {
+            getDevice();
+        }, 5000);
+        return () => {
+            clearInterval(updateInterval);
+        }
+    }, [])
 
     function reportRedirect(index:Number){
         sessionStorage.setItem("reportIndex", index.toString());
