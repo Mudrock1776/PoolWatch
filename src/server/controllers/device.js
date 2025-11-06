@@ -62,6 +62,7 @@ exports.deviceExists = async (req,res) => {
 //Create Device
 exports.createDevice = async (req, res) => {
     try {
+        const now = new Date();
         var newDevice = new device({
             serialNumber: req.body.serialNumber,
             battery: req.body.battery,
@@ -77,6 +78,7 @@ exports.createDevice = async (req, res) => {
             testParticulate: false,
             updateServers: [],
             reports: [],
+            lastUpdate: now.getTime()
         });
         await newDevice.save();
         res.status(200).send({
@@ -95,6 +97,8 @@ exports.addReport = async (req, res) => {
         const now = new Date();
         newReport.testTaken = `${now.getMonth()+1}/${now.getDate()}/${now.getFullYear()} - ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        searchedDevice.lastUpdate = now.getTime();
+        searchedDevice.connected = true;
         searchedDevice.reports.unshift(newReport);
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send({
@@ -205,6 +209,7 @@ exports.addReport = async (req, res) => {
 exports.statusUpdate = async (req, res) => {
     try {
         const modifiedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        const now = new Date();
         res.status(200).send({
             needUpdate: modifiedDevice.needUpdate,
             sampleRate: modifiedDevice.sampleRate,
@@ -224,6 +229,7 @@ exports.statusUpdate = async (req, res) => {
             testPhosphate: false,
             testTempature: false,
             testParticulate: false,
+            lastUpdate: now.getTime()
         });
     } catch(err){
         console.log(err);

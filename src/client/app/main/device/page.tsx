@@ -158,7 +158,7 @@ export default function Page(){
             <div className="grid grid-cols-2 mx-6 my-2">
                 <div className="">
                     <h1 className="text-white underline text-xl mx-auto mb-2">Status</h1>
-                    {device.connected ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">connected</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">disconnected</p>}
+                    {device.connected ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Connected</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Disconnected</p>}
                     <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Battery: {device.battery}</p>
                     {device.pumpStatus ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">pumpStatus: working</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">pumpStatus: failed</p>}
                     {device.fiveRegulator ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">fiveRegulator: working</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">fiveRegulator: failed</p>}
