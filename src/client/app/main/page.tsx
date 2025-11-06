@@ -114,7 +114,17 @@ export default function Page(){
                 serialNumber: serialNumber
             })
         });
-        mainMenu();
+        const tokenString = localStorage.getItem("PoolWatchtoken");
+        const res2 = await fetch("/device/list", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: tokenString
+            })
+        });
+        setDevices(await res2.json());
     }
 
     function devicePopUP() {
