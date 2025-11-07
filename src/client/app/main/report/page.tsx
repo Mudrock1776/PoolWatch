@@ -55,8 +55,8 @@ export default function Page(){
             <div className="ml-6 mt-2">
                 <h1 className="text-white underline text-xl">Results</h1>
                 <p className="text-white">Chlorine Concentration: {device.reports[deviceReport].ClCon}</p>
-                <p className="text-white">Phospahe Concentration: {device.reports[deviceReport].PCon}</p>
-                <p className="text-white">tempature: {device.reports[deviceReport].tempature}</p>
+                <p className="text-white">Phosphate Concentration: {device.reports[deviceReport].PCon}</p>
+                <p className="text-white">Temperature: {device.reports[deviceReport].tempature}</p>
                 <p className="text-white">Particulate Amount: {device.reports[deviceReport].particulateAmount}</p>
                 <p className="text-white">Particulate Size: {device.reports[deviceReport].particulateSize}</p>
             </div>

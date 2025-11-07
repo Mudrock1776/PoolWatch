@@ -27,6 +27,8 @@ spec:
         env:
         - name: MONGOURL
           value: {{ .Values.poolwatch.database }}
+        - name: DISCONNECT_TIMEOUT
+          value: "{{ .Values.poolwatch.dcTimeout }}"
         - name: EMAILPASSWORD
           valueFrom:
             secretKeyRef:

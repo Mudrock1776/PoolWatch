@@ -1,7 +1,6 @@
 const account = require("../models/account");
 const device = require("../models/device");
 const mongoose = require("mongoose");
-const { searchIndex } = require("../models/notify");
 
 //acounts
 //Create account
@@ -56,6 +55,10 @@ exports.addDevice = async (req, res) => {
             res.status(403).send({
                 err: "Device already added"
             });
+        } else if (!(await device.exists({serialNumber:req.body.serialNumber}))){
+            res.status(404).send({
+                err: "Device does not exists"
+            })
         } else {
             oldAccount.devices.push(req.body.serialNumber);
             await account.findByIdAndUpdate(req.body.id, oldAccount);
@@ -95,9 +98,14 @@ exports.removeDevice = async (req, res) => {
 exports.listDevices = async (req, res) => {
     try{
         userAccount = await account.findById(req.body.id);
+        const now = new Date();
         let deviceList = [];
         for (let i=0; i<userAccount.devices.length; i++){
             pulledDevice = await device.findOne({serialNumber: userAccount.devices[i]});
+            if (now.getTime() - pulledDevice.lastUpdate > process.env.DISCONNECT_TIMEOUT){
+                pulledDevice.connected = false;
+                device.findByIdAndUpdate(pulledDevice._id, pulledDevice);
+            }
             deviceList.push(pulledDevice);
         }
         await res.status(200).send(deviceList);
@@ -110,7 +118,12 @@ exports.listDevices = async (req, res) => {
 //fetch Device
 exports.fetchDevice = async (req, res) => {
     try{
+        const now = new Date();
         searchedDevice = await device.findOne({serialNumber: req.body.serialNumber});
+        if (now.getTime() - searchedDevice.lastUpdate > process.env.DISCONNECT_TIMEOUT){
+            searchedDevice.connected = false;
+            device.findByIdAndUpdate(searchedDevice._id, pulledDevice);
+        }
         res.status(200).send(searchedDevice);
     } catch(err){
         console.log(err);

@@ -28,12 +28,18 @@ export default function Page(){
             });
             setDevice(await res.json());
         }
-        getDevice();
         const tokenString = localStorage.getItem("PoolWatchtoken");
         if (tokenString == null){
             redirect("/");
         }
-    }, [device.reports.length])
+        getDevice();
+        const updateInterval = setInterval(() => {
+            getDevice();
+        }, 5000);
+        return () => {
+            clearInterval(updateInterval);
+        }
+    }, [])
 
     function reportRedirect(index:Number){
         sessionStorage.setItem("reportIndex", index.toString());
@@ -152,7 +158,7 @@ export default function Page(){
             <div className="grid grid-cols-2 mx-6 my-2">
                 <div className="">
                     <h1 className="text-white underline text-xl mx-auto mb-2">Status</h1>
-                    {device.connected ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">connected</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">disconnected</p>}
+                    {device.connected ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Connected</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Disconnected</p>}
                     <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Battery: {device.battery}</p>
                     {device.pumpStatus ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">pumpStatus: working</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">pumpStatus: failed</p>}
                     {device.fiveRegulator ? <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">fiveRegulator: working</p>:<p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">fiveRegulator: failed</p>}
@@ -175,7 +181,7 @@ export default function Page(){
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <th scope="col" className="px-6 py-3">Test</th>
-                                        <th scope="col" className="px-6 py-3">Tempature</th>
+                                        <th scope="col" className="px-6 py-3">Temperature</th>
                                         <th scope="col" className="px-6 py-3">Chlorine Concentration</th>
                                         <th scope="col" className="px-6 py-3"></th>
                                     </tr>
