@@ -66,6 +66,7 @@ export default function Page(){
                 <p className="text-white">Particulate Amount: {device.reports[deviceReport].particulateAmount}</p>
                 <p className="text-white">Particulate Size: {device.reports[deviceReport].particulateSize}</p>
             </div>
+            </main>
         </div>
     )
 }
