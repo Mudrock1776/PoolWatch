@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import TopMenu from "../ui/TopMenu";
+import Sidebar from "../ui/Sidebar";
+
 export default function Page(){
     const [device, setDevice] = useState({
         serialNumber: 0,
@@ -23,6 +25,8 @@ export default function Page(){
         }]
     });
     const [deviceReport, setDeviceReport] = useState(0)
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    
     useEffect(() => {
         const tokenString = localStorage.getItem("PoolWatchtoken");
         if (tokenString == null){
@@ -50,8 +54,10 @@ export default function Page(){
         console.log(device.reports[deviceReport]);
     }, [device.reports.length, deviceReport]);
     return(
-        <div>
-            <TopMenu serialNumber={device.serialNumber} testTaken={device.reports[deviceReport].testTaken}/>
+        <div className="min-h-screen flex">
+            <Sidebar open={sidebarOpen} />
+            <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+            <TopMenu serialNumber={device.serialNumber} testTaken={device.reports[deviceReport].testTaken}onToggleSidebar={() => setSidebarOpen((prev) => !prev)}/>
             <div className="ml-6 mt-2">
                 <h1 className="text-white underline text-xl">Results</h1>
                 <p className="text-white">Chlorine Concentration: {device.reports[deviceReport].ClCon}</p>
