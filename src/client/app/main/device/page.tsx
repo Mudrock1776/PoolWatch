@@ -16,6 +16,7 @@ export default function Page(){
         reports: []
     });
     const [search, setSearch] = useState("");
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     useEffect(() => {
         async function getDevice() {
             const res = await fetch("/device/fetch", {
@@ -114,6 +115,8 @@ export default function Page(){
 
     function listReports(){
         var index = -1;
+        const searchLower = search.toLowerCase();
+        
         return(device.reports.map((item:any) => {
             index += 1;
             const curIndex = index;
@@ -204,6 +207,7 @@ export default function Page(){
                     );
                 }
             })()}
+            </main>
         </div>
     )
 }
