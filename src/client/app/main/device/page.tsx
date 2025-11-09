@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, MouseEvent } from "react";
 import { redirect } from 'next/navigation';
+import Sidebar from "../ui/Sidebar";
 
 export default function Page(){
     const [device, setDevice] = useState({
@@ -116,7 +117,8 @@ export default function Page(){
         return(device.reports.map((item:any) => {
             index += 1;
             const curIndex = index;
-            if (item.testTaken.match(search)){
+            const searchField = item && item.testTaken ? String(item.testTaken) : "";
+            if (searchField.toLowerCase().includes(searchLower)){
                 return(
                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                         <th onClick={(e)=>{reportRedirect(curIndex)}} className="px-6 py-4 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">{item.testTaken}</th>
@@ -129,9 +131,17 @@ export default function Page(){
         }));
     }
     return(
-        <div>
-            <header className="bg-gray-900">
+        <div className="min-h-screen flex">
+            <Sidebar open={sidebarOpen} />
+            <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+                <header className="bg-[#424C5E] h-16">
                 <nav aria-label="Global" className="flex max-w-8xl items-center justify-start p-6 lg:px-8">
+                     <button type="button"onClick={() => setSidebarOpen(prev => !prev)}
+                         className="flex items-center justify-center h-8 w-8 mr-4 rounded-md bg-gray-100 text-gray-800 shadow hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900">
+                         <span className="sr-only">Toggle sidebar</span>
+                         <svg className="h-5 w-5"fill="none"xmlns="http://www.w3.org/2000/svg"viewBox="0 0 24 24"stroke="currentColor">
+                             <path strokeLinecap="round"strokeLinejoin="round"strokeWidth={2}d="M4 6h16M4 12h16M4 18h16"/></svg>
+                     </button>
                     <div className="flex lg:flex-1 lg:gap-x-12">
                         <p onClick={(e)=>mainMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Home</p>
                         <p onClick={(e)=>deviceMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Device #{device.serialNumber}</p>
