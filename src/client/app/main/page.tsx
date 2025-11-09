@@ -1,268 +1,220 @@
-'use client';
+"use client"; 
 import { MouseEvent, useEffect, useState } from "react";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+import TopMenu from "./ui/TopMenu";
+import Sidebar from "./ui/Sidebar";
+import Calendar from "./ui/Calendar";
 
 type deviceType = {
-        serialNumber: number,
-        battery: number,
-        connected: boolean,
-        pumpStatus: boolean,
-        fiveRegulator: boolean,
-        twelveRegulator: boolean,
-        sampleRate: number,
-        updateServers: any[],
-        reports: any[]
+  serialNumber: number;
+  battery: number;
+  connected: boolean;
+  pumpStatus: boolean;
+  fiveRegulator: boolean;
+  twelveRegulator: boolean;
+  sampleRate: number;
+  updateServers: any[];
+  reports: any[];
 };
 
-export default function Page(){
-    const [devices, setDevices] = useState<any[]>([]);
-    const [serialNumberForm, setSerialNumberForm] = useState(0);
-    const [search, setSearch] = useState("");
-    const [addingDevice, setAddingDevice] = useState(0);
-    const [err, setErr] = useState("");
-    
-    useEffect(() => {
-        async function loadDevices() {
-            const tokenString = localStorage.getItem("PoolWatchtoken");
-            const res = await fetch("/device/list", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    id: tokenString
-                })
-              });
-            setDevices(await res.json());
-        }
-        const tokenString = localStorage.getItem("PoolWatchtoken");
-        if (tokenString == null){
-            redirect("/");
-        }
-        loadDevices();
-        const updateInterval = setInterval(() => {
-            loadDevices();
-        }, 5000);
-        return () => {
-            clearInterval(updateInterval);
-        }
-    }, [])
+export default function Page() {
+  const [devices, setDevices] = useState<deviceType[]>([]);
+  const [serialNumberForm, setSerialNumberForm] = useState(0);
+  const [err, setErr] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
-    async function onsubmit(e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>){
-        e.preventDefault();
-        const tokenString = localStorage.getItem("PoolWatchtoken");
-        const res = await fetch("/device/add", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: tokenString,
-                serialNumber: serialNumberForm
-            })
-          });
-        if (res.status == 403){
-            setErr("Device already added");
-            return;
-        }
-        if (res.status == 404){
-            setErr("Device does not exists");
-            return;
-        }
-        const res2 = await fetch("/device/list", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: tokenString
-            })
-        });
-        let loadedDevices = await res2.json();
-        setDevices(loadedDevices);
-        setAddingDevice(0);
-    }
-
-    function deviceRedirect(serialNumber:Number){
-        sessionStorage.setItem("serial", serialNumber.toString());
-        redirect("/main/device");
-    }
-    function settingRedirect(serialNumber:Number){
-        sessionStorage.setItem("serial", serialNumber.toString());
-        redirect("/main/device/settings");
-    }
-    function mainMenu(){
-        sessionStorage.removeItem("serial");
-        sessionStorage.removeItem("reportIndex");
-        redirect("/main");
-    }
-    function logOut(){
-        sessionStorage.removeItem("serial");
-        sessionStorage.removeItem("reportIndex");
-        localStorage.removeItem("PoolWatchtoken");
-        redirect("/");
-    }
-
-    async function removeDevice(serialNumber:number) {
-        const res = await fetch("/device/remove", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: localStorage.getItem("PoolWatchtoken"),
-                serialNumber: serialNumber
-            })
-        });
-        const tokenString = localStorage.getItem("PoolWatchtoken");
-        const res2 = await fetch("/device/list", {
-            method: "POST",
-            headers: {
+  useEffect(() => {
+    async function loadDevices() {
+      const tokenString = localStorage.getItem("PoolWatchtoken");
+      const res = await fetch("/device/list", {
+        method: "POST",
+        headers: {
             "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 id: tokenString
             })
         });
-        setDevices(await res2.json());
+      setDevices(await res.json());
     }
 
-    function devicePopUP() {
-        if (addingDevice == 1){
-            return(
-                <form className="max-w-sm left-1/2 border-2 rounded-md border-black bg-gray-500 p-5 absolute z-50">
-                    <div className="mb-5">
-                        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Serial Number</label>
-                        <input value={serialNumberForm} onChange={(e) => setSerialNumberForm(Number(e.target.value))} type="number" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Serial Number" required />
+    const tokenString = localStorage.getItem("PoolWatchtoken");
+    if (tokenString == null){
+        redirect("/");
+    }
+
+    loadDevices();
+    const updateInterval = setInterval(() => {
+        loadDevices();
+    }, 5000);
+    return () => {
+        clearInterval(updateInterval);
+    }
+  }, [])
+
+  async function onsubmit(e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) {
+    e.preventDefault();
+    const tokenString = localStorage.getItem("PoolWatchtoken");
+    const res = await fetch("/device/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+          id: tokenString,
+          serialNumber: serialNumberForm 
+      }),
+    });
+    if (res.status == 403) {
+      setErr("Device already added");
+      return;
+    }
+    if (res.status == 404) {
+      setErr("Device does not exist");
+      return;
+    }
+    const res2 = await fetch("/device/list", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify({ 
+        id: tokenString }),
+    });
+    setDevices(await res2.json());
+    setErr("");
+    setSerialNumberForm(0);
+  }
+
+  function deviceRedirect(serialNumber: Number) {
+    sessionStorage.setItem("serial", serialNumber.toString());
+    redirect("/main/device");
+  }
+
+  function settingRedirect(serialNumber: Number) {
+    sessionStorage.setItem("serial", serialNumber.toString());
+    redirect("/main/device/settings");
+  }
+
+  function listDevices() {
+    return devices.map((device: deviceType) => (
+      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+        <th className="px-6 py-4 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">{device.serialNumber}</th>
+        <td className="px-6 py-4">
+          <button type="button"onClick={(e) => settingRedirect(device.serialNumber)}className="text-xs px-3 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-600 hover:scale-105 active:scale-95 transition-all duration-150 shadow-sm">Configure</button>
+        </td>
+        <td className="px-6 py-4">
+          <button type="button"onClick={(e) => deviceRedirect(device.serialNumber)}className="text-xs px-3 py-1.5 rounded bg-gray-800 text-white hover:bg-gray-600 hover:scale-105 active:scale-95 transition-all duration-150 shadow-sm">Dashboard
+          </button>
+        </td>
+      </tr>
+    ));
+  }
+
+  return (
+    <>
+      <div className="min-h-screen flex">
+        <Sidebar open={sidebarOpen} />
+        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+          <TopMenu onToggleSidebar={() => setSidebarOpen((prevOpen) => !prevOpen)}/>
+          <div className="grid ]grid-cols-1 lg:grid-cols-3 gap-4 p-4">
+            <div className="bg-white rounded-lg shadow p-4 h-full relative">
+              <h2 className="text-xl font-semibold">Chlorine</h2>
+              <img src="/TestProcedureP.png"alt="Chlorine Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 h-full relative">
+              <h2 className="text-xl font-semibold">Phosphate</h2>
+              <img src="/TestProcedure2.png"alt="Phosphate Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
+              <div className="mt-4">
+                <p className="text-gray-700 mb-2">Watch the guide on how to perform the phosphate test.</p>
+                <button type="button"onClick={() => setShowVideo(true)}className="inline-block px-4 py-2 rounded bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors duration-200">View Test Procedure</button>
+              </div>
+              {showVideo && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm"onClick={() => setShowVideo(false)}>
+                  <div className="bg-white rounded-lg shadow-lg p-4 max-w-3xl w-full relative"onClick={(e) => e.stopPropagation()}>
+                    <button type="button"onClick={() => setShowVideo(false)}className="absolute -top-3 -right-3 bg-white text-black font-bold text-2xl rounded-full w-9 h-9 flex items-center justify-center shadow-md hover:bg-gray-200 hover:scale-110 transition-all duration-150">✕</button>
+                    <div className="w-full h-0 pb-[56.25%] relative">
+                      <iframe src="https://www.youtube.com/embed/gVq0LEjczDc"title="Phosphate Test Procedure"allowFullScreen className="absolute top-0 left-0 w-full h-full rounded-lg"></iframe>
                     </div>
-                    <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{err}</p>
-                    <button type="submit" onClick={onsubmit} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
-                    <button type="submit" onClick={() => setAddingDevice(0)} className="text-white ml-10 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Cancel</button>
-                </form>
-            )
-        }
-    }
-
-    function listDevices(){
-        return devices.map((device:deviceType) => {
-            if (search != ""){
-                if (device.serialNumber == Number(search)){
-                    return(
-                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                            <th onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">{device.serialNumber}</th>
-                            {device.connected ? <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.battery*100}%</td>:<td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">Disconnected</td>}
-                            {(() => {
-                                if(device.reports.length > 0){
-                                    return(
-                                        <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.reports[0].tempature}</td>
-                                    )
-                                } else {
-                                    return(
-                                        <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">NA</td>
-                                    )
-                                }
-                            })()}
-                            {(() => {
-                                if(device.reports.length > 0){
-                                    return(
-                                        <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.reports[0].ClCon}</td>
-                                    )
-                                } else {
-                                    return(
-                                        <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">NA</td>
-                                    )
-                                }
-                            })()}
-                            <td onClick={(e) =>{settingRedirect(device.serialNumber)}} className="px-6 py-4">Configure</td>
-                            <td onClick={(e) =>{removeDevice(device.serialNumber)}} className="px-6 py-4">Delete</td>
-                        </tr>
-                    )
-                }
-            } else{
-                return(
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                        <th onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4 bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">{device.serialNumber}</th>
-                        {device.connected ? <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.battery*100}%</td>:<td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">Disconnected</td>}
-                        {(() => {
-                            if(device.reports.length > 0){
-                                return(
-                                    <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.reports[0].tempature}</td>
-                                )
-                            } else {
-                                return(
-                                    <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">NA</td>
-                                )
-                            }
-                        })()}
-                        {(() => {
-                            if(device.reports.length > 0){
-                                return(
-                                    <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">{device.reports[0].ClCon}</td>
-                                )
-                            } else {
-                                return(
-                                    <td onClick={(e)=>{deviceRedirect(device.serialNumber)}} className="px-6 py-4">NA</td>
-                                )
-                            }
-                        })()}
-                        <td onClick={(e) =>{settingRedirect(device.serialNumber)}} className="px-6 py-4">Configure</td>
-                        <td onClick={(e) =>{removeDevice(device.serialNumber)}} className="px-6 py-4">Delete</td>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="lg:row-span-2 grid gap-4 h-full grid-rows-[auto_auto_1fr]">
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-xl font-semibold">Add Device</h2>
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  <input
+                    type="number"
+                    min={1}
+                    value={serialNumberForm || ""}onChange={(e) => setSerialNumberForm(Number(e.target.value))}className="max-w-sm border rounded p-2"placeholder="Serial #"/>
+                  <button type="button"onClick={onsubmit}className="px-3 py-2 rounded bg-blue-500 text-white hover:bg-blue-600">Submit</button>
+                  <button type="button"onClick={(e) => {setSerialNumberForm(0);setErr("");}}className="px-3 py-2 rounded bg-red-600 text-white hover:bg-red-700">Cancel</button>
+                </div>
+                {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 overflow-x-auto">
+                {devices.length > 0 && (
+                  <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead className="text-xs text-gray-800 uppercase bg-gray-200 dark:bg-gray-600 dark:text-gray-100">
+                      <tr>
+                        <th className="px-6 py-3">Device</th>
+                        <th className="px-6 py-3"></th>
+                        <th className="px-6 py-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody>{listDevices()}</tbody>
+                  </table>
+                )}
+                {devices.length == 0 && (<p className="text-sm text-gray-500">No devices yet.</p>)}
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 min-h-0 h-full">
+                <h2 className="text-lg font-semibold mb-2">Calendar</h2>
+                <Calendar height={260} startOnMonday />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 lg:col-span-2">
+              <h2 className="text-xl font-semibold mb-2">Particulate Table</h2>
+              <table className="min-w-full border-collapse table-auto text-sm mt-2 border border-gray-200 text-center">
+                <thead className="bg-blue-100">
+                  <tr>
+                    <th className="px-6 py-3 font-semibold border border-gray-200 text-center">Size</th>
+                    <th className="px-6 py-3 font-semibold border border-gray-200 text-center">Classification</th>
+                    <th className="px-6 py-3 font-semibold border border-gray-200 text-center">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="px-6 py-3 border border-gray-200 text-center">10 - 20 µm</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">
+                      <span className="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Large</span>
+                    </td>
+                    <td className="px-6 py-3 border border-gray-200">51 - 100</td>
                     </tr>
-                )
-            }
-        })
-    }
-
-    return(
-        <div>
-            <header className="bg-gray-900 mb-6">
-                <nav aria-label="Global" className="flex max-w-8xl items-center justify-start p-6 lg:px-8">
-                    <div className="flex lg:flex-1 lg:gap-x-12">
-                        <p onClick={(e)=>mainMenu()} className="-m-1.5 p-1.5 h-8 w-auto font-semibold text-white ">Home</p>
-                    </div>
-                    <div className="lg:flex lg:gap-x-12">
-                        <form className="max-w-2xl mx-auto">   
-                            <label className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                    </svg>
-                                </div>
-                                <input value={search} onChange={(e)=> setSearch(e.target.value)} type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search reports" required />
-                            </div>
-                        </form>
-                    </div>
-                    <div className="lg:flex lg:flex-1 lg:gap-x-12 lg:justify-end">
-                        <p onClick={(e)=>setAddingDevice(1)} className="text-sm/6 font-semibold text-white">Add Device</p>
-                        <p onClick={(e)=>logOut()} className="text-sm/6 font-semibold text-white">Log Out</p>
-                    </div>
-                </nav>
-            </header>
-            {devicePopUP()}
-            {(() => {
-                if (devices.length > 0){
-                    return(
-                        <div className="relative overflow-x-auto mx-6">
-                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3">Device</th>
-                                        <th scope="col" className="px-6 py-3">Status</th>
-                                        <th scope="col" className="px-6 py-3">temperature</th>
-                                        <th scope="col" className="px-6 py-3">Chlorine Concentration</th>
-                                        <th scope="col" className="px-6 py-3"></th>
-                                        <th scope="col" className="px-6 py-3"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {listDevices()}
-                                </tbody>
-                            </table>
-                        </div>
-                    );
-                }
-            })()}
-        </div>
-    )
+                    <tr>
+                      <td className="px-6 py-3 border border-gray-200 text-center">5 - 10</td>
+                      <td className="px-6 py-3 border border-gray-200 text-center">
+                      <span className="inline-flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
+                        <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>Medium</span>
+                    </td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">26 - 50</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-3 border border-gray-200 text-center">0 - 5</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">
+                      <span className="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-full">
+                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>Small</span>
+                    </td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">0 - 25</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </>
+  );
 }
