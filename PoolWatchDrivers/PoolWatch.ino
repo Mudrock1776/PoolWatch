@@ -1,19 +1,29 @@
 #include "PoolWatchWebDrivers.h"
-#include <TimerOne.h>
+#include "TempSensorDrivers.h"
+#include "Relay.h"
+#include "LEDDriver.h"
+#include "DebugPanelDrivers.h"
+#include "BatteryMonitor.h"
 
 char *WIFI_SSID = ""; //Your wifi name
 char *WIFI_PASSWORD = ""; //Your wifi password
 
-char *SERVER_HOST = "192.168.1.69"; //This would be the hostname of the website
-char *SERVER_IP = "192.168.1.69"; //This is needed for my tests with my home webserver
-int SERVER_PORT = 8080;
-int DEVICE_SERIAL = 2;
+char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
+char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
+int SERVER_PORT = 80;
+int DEVICE_SERIAL = 1;
+unsigned long int StatusDelay = 100000;
 bool DEBUG = true;
+bool CuvvettesFull;
+float tempF = 0;
+float CLCon = 0;
+float PCon = 0;
+int PartAmount = 0;
+String PartSize = "small";
+BatteryMonitor batteryMonitor(34);
+TemperatureSensor tempSensor(33);
 
 float statusOutput[5];
-unsigned long int SAMPLE_RATE = 86400000; //24 hours
-unsigned long int STATUS_RATE = 30000000;
-
 
 void setup() {
   if (DEBUG){
@@ -22,35 +32,38 @@ void setup() {
   // Establish Connection to Web Server
   PoolWatchWebDrivers.connectWiFi(WIFI_SSID,WIFI_PASSWORD);
   PoolWatchWebDrivers.establishDevice(SERVER_HOST,SERVER_IP,SERVER_PORT,DEVICE_SERIAL);
-
-  // Set Up Automatic Status Updates
-  Timer1.initialize(STATUS_RATE);
-  Timer1.attachInterrupt(statusUpdate);
-
-
-}
-
-void statusUpdate() {
-  PoolWatchWebDrivers.sendStatus(1, true, true, true, statusOutput);
-  if(statusOutput[0] != 0){
-    Serial.println("Update Sample Rate");
-    Serial.println(statusOutput[0]);
-    if (statusOutput[1]){
-      Serial.println("Run Chlorine Test");
-    }
-    if (statusOutput[2]){
-      Serial.println("Run Phosphate Test");
-    }
-    if (statusOutput[3]){
-      Serial.println("Run Tempature Test");
-    }
-    if (statusOutput[4]){
-      Serial.println("Run Particulate Test");
-    }
-  }
+  batteryMonitor.setPin();
+  debugPanelDrivers.initializePins();
+  tempSensor.begin();
+  CuvvettesFull = false;
 }
 
 void loop() {
+  float batteryCharge = batteryMonitor.readPercent();
+  bool pumpStatus = true; //If we have away to know this update this value;
+  bool fiveRegulator = debugPanelDrivers.get5RegStatus();
+  bool twelveRegulator = debugPanelDrivers.get12RegStatus();
 
-  delay(10000);
+  PoolWatchWebDrivers.sendStatus(batteryCharge, true, false, true, statusOutput);
+  if(statusOutput[0] != 0){
+    if (statusOutput[1]){
+      //Run Chlorine Test
+      CLCon = 0;
+    }
+    if (statusOutput[2]){
+      //Run Phosphate Test
+      PCon = 0;
+    }
+    if (statusOutput[3]){
+      //Run Temperature Test
+      tempF = tempSensor.getTempF();
+    }
+    if (statusOutput[4]){
+      //Run Particulate Test
+      PartAmount = 0;
+      PartSize = "small";
+    }
+    PoolWatchWebDrivers.sendReport(tempF, CLCon, PCon, PartAmount, PartSize);
+  }
+  delay(StatusDelay);
 }
