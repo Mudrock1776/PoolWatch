@@ -1,8 +1,8 @@
 #include "PoolWatchWebDrivers.h"
 #include <TimerOne.h>
 
-char *WIFI_SSID = "hughes"; //Your wifi name
-char *WIFI_PASSWORD = "dolfan13"; //Your wifi password
+char *WIFI_SSID = ""; //Your wifi name
+char *WIFI_PASSWORD = ""; //Your wifi password
 
 char *SERVER_HOST = "192.168.1.69"; //This would be the hostname of the website
 char *SERVER_IP = "192.168.1.69"; //This is needed for my tests with my home webserver
