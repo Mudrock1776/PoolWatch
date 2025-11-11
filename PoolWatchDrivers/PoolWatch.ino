@@ -5,6 +5,8 @@
 #include "DebugPanelDrivers.h"
 #include "BatteryMonitor.h"
 
+
+
 char *WIFI_SSID = ""; //Your wifi name
 char *WIFI_PASSWORD = ""; //Your wifi password
 
@@ -22,8 +24,95 @@ int PartAmount = 0;
 String PartSize = "small";
 BatteryMonitor batteryMonitor(34);
 TemperatureSensor tempSensor(33);
+Relay pump(RELAY1PIN);
+Relay solenoid1(RELAY2PIN);  
+Relay solenoid2(RELAY3PIN); 
+Relay stirrer(RELAY4PIN);    
+
+
+//Relay On Timings 
+unsigned long pumpMs = 5000;  // 5s
+unsigned long solenoidMs = 2000;  
+unsigned long stirrerMs = 3000;  
+unsigned long phosphateWait = 6000; //wait time b/w phosphate reagent dispensing 
+//Spacing Delays b/w operations
+unsigned long pumpToSolenoidDelay = 1000;  // pause after pump ends for settling 
+unsigned long solenoidToStirDelay = 500;   // pause after solenoid ends
+unsigned long phosphateLoadWait = 45000;  // 45 pause b/w phosphate reagent loading
 
 float statusOutput[5];
+
+//chlorineParticulate Run 
+void runChlorineParticulateSequence() {
+  CuvvettesFull = false;
+  //running pump
+  pump.turnOnFor(pumpMs);
+  while (pump.state() == HIGH) {
+    pump.update();
+  }
+  if (DEBUG) {
+    Serial.print("Waiting ");
+  }
+  delay(pumpToSolenoidDelay);
+  //running solenoid 1 
+  solenoid1.turnOnFor(solenoidMs);
+  while (solenoid1.state() == HIGH) {
+    solenoid1.update();
+  }
+  if (DEBUG) {
+    Serial.print("Waiting ");
+  }
+  delay(solenoidToStirDelay);
+  //running stirrer 
+  stirrer.turnOnFor(stirrerMs);
+  while (stirrer.state() == HIGH) {
+    stirrer.update();
+  }
+  CuvvettesFull = true; //end
+}
+
+//phosphate run
+void runPhosphateSequence() {
+  CuvvettesFull = false;
+  // Pump on
+  pump.turnOnFor(pumpMs);
+  while (pump.state() == HIGH) {
+    pump.update();
+  }
+  //wait between pump and first solenoid 
+  if (DEBUG) {
+    Serial.print("Waiting ");
+    Serial.print(pumpToSolenoidDelay);
+  }
+  delay(pumpToSolenoidDelay);
+  //3 cycles of wait then solenoid2 then stir
+  for (int cycle = 0; cycle < 3; cycle++) {
+    //wait to load reagents before this dose
+    if (phosphateWait > 0) {
+      if (DEBUG) {
+      Serial.print("Waiting before cycle ");
+      Serial.print(cycle + 1);
+      Serial.println("...");
+      }
+      unsigned long startWait = millis();
+      while (millis() - startWait < phosphateWait) {
+        delay(10);  
+      }
+    }
+    //run solenoid 2
+    solenoid2.turnOnFor(solenoidMs);
+    while (solenoid2.state() == HIGH) {
+      solenoid2.update();
+    }
+    //run stirrer
+    stirrer.turnOnFor(stirrerMs);
+    while (stirrer.state() == HIGH) {
+      stirrer.update();
+    }
+  }
+  CuvvettesFull = true;
+}
+
 
 void setup() {
   if (DEBUG){
@@ -40,7 +129,8 @@ void setup() {
 
 void loop() {
   float batteryCharge = batteryMonitor.readPercent();
-  bool pumpStatus = true; //If we have away to know this update this value;
+  //bool pumpStatus = true; //If we have away to know this update this value;
+  bool pumpStatus = (pump.state() == HIGH);   // relay HIGH = pump ON
   bool fiveRegulator = debugPanelDrivers.get5RegStatus();
   bool twelveRegulator = debugPanelDrivers.get12RegStatus();
 
@@ -66,4 +156,6 @@ void loop() {
     PoolWatchWebDrivers.sendReport(tempF, CLCon, PCon, PartAmount, PartSize);
   }
   delay(StatusDelay);
+
+
 }
