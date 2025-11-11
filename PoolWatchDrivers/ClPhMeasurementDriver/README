@@ -1,0 +1,3 @@
+// === Beer–Lambert Chlorine Concentration Measurement ===
+
+// Reads photocurrent from a PIN photodiode (via analog input) // and calculates concentration using Beer–Lambert Law. // absorbance (0–1 range) and concentration (mol/L). // All output is printed to the Serial Monitor.
