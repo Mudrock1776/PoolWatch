@@ -1,0 +1,61 @@
+// === Beer–Lambert Concentration Measurement ===
+
+// Reads photocurrent from a PIN photodiode (via analog input)
+// and calculates concentration using Beer–Lambert Law.
+// absorbance (0–1 range) and concentration (mol/L).
+// All output is printed to the Serial Monitor.
+
+const int photoPin = 34;                  // Analog pin connected to photodiode circuit
+const float referenceIntensity = 4095.0;  // Reference I0 (blank or max ADC value)
+const float molarAbsorptivity = 12160.0;  // ε value (L·mol⁻¹·cm⁻¹)
+const float pathLength = 1.0;             // Path length in cm
+const float molarMass = 115.03;            // Molar mass in g/mol
+const int minSignalThreshold = 10;        // ADC counts below this = "no signal"
+
+void setup() {
+  Serial.begin(115200);
+  analogReadResolution(12);  // ESP32 12-bit ADC (0–4095)
+  Serial.println("=== Beer–Lambert Concentration Measurement ===");
+  delay(1000);
+}
+
+void loop() {
+  int adcValue = analogRead(photoPin);
+
+  // Protect against zero or noise floor
+  if (adcValue < minSignalThreshold) {
+    adcValue = 0;
+  }
+
+  float absorbance = 0.0;
+  float concentration = 0.0;
+
+  if (adcValue > 0) {
+    float intensityRatio = (float)adcValue / referenceIntensity;
+    if (intensityRatio > 1.0) intensityRatio = 1.0; // Cap ratio to avoid negative absorbance
+    if (intensityRatio < 0.001) intensityRatio = 0.001; // Avoid log(0)
+    
+    // Beer-Lambert Law: A = log10(I0 / I)
+    absorbance = log10(1.0 / intensityRatio);
+
+    // Clamp absorbance to 0–1 range
+    if (absorbance < 0.0) absorbance = 0.0;
+    if (absorbance > 1.0) absorbance = 1.0;
+
+    // c = A / (ε * l)
+    concentration = (absorbance / (molarAbsorptivity * pathLength)) * molarMass * 1000;
+
+  } else {
+    // No signal detected: assume 0 absorbance and 0 concentration
+    absorbance = 0.0;
+    concentration = 0.0;
+  }
+  // Print results
+  Serial.println("======================================");
+  Serial.printf("Raw ADC Value: %d\n", adcValue);
+  Serial.printf("Absorbance (0–1): %.4f\n", absorbance);
+  Serial.printf("Concentration (ppm): %.8f\n", concentration);
+  Serial.println("======================================\n");
+
+  delay(1000);
+}
