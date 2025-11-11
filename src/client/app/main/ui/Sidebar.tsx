@@ -99,7 +99,7 @@ export default function Sidebar({ open }: { open: boolean }) {
               <span className="font-semibold text-gray-800">Chlorine Calibration</span>
               <button type="button"className="text-gray-500 hover:text-gray-700"onClick={() => setShowChlorineModal(false)}>✕</button>
             </div>
-            <div className="p-4"><img src="/LineGraph.png"alt="Chlorine Calibration Curve"className="h-auto w-full"/>
+            <div className="p-4"><img src="/LineGraph_1.png"alt="Chlorine Calibration Curve"className="h-auto w-full"/>
             </div>
           </div>
         </div>
@@ -113,10 +113,11 @@ export default function Sidebar({ open }: { open: boolean }) {
               <span className="font-semibold text-gray-800">Phosphate Calibration</span>
               <button type="button"className="text-gray-500 hover:text-gray-700"onClick={() => setShowPhosphateModal(false)}>✕</button>
             </div>
-            <div className="p-4"><img src="/LineGraph.png"alt="Phosphate Calibration Curve"className="h-auto w-full"/></div>
+            <div className="p-4"><img src="/LineGraph_2.png"alt="Phosphate Calibration Curve"className="h-auto w-full"/></div>
           </div>
         </div>
       )}
     </>
   );
 }
+
