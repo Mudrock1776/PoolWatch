@@ -1,13 +1,20 @@
-#ifndef PII2CMASTER_H
-#define PII2CMASTER_H
+#ifndef esp32_I2C_H
+#define esp32_I2C_H
 
 #include <Arduino.h>
 #include <Wire.h>
 #include <vector>
 
+struct CaptureParsed {
+  bool   ok = false;
+  int    count = 0;
+  String s1, s2, s3;
+  String raw;     // full payload
+  String error;   // "ERR_*" if any
+};
+
 class PiI2CMaster {
 public:
-  // Constructor. chunkBytes defaults to 120 (safe vs ESP32 Wire buffer).
   PiI2CMaster(uint8_t  piAddr,
               int      sdaPin,
               int      sclPin,
@@ -17,19 +24,12 @@ public:
               uint32_t procTimeoutMs,
               uint16_t chunkBytes = 120);
 
-  // Bring up I2C (does not wake the Pi).
-  void begin();
-
-  // Wake the Pi by pulsing its GPIO3 line low via our wakePin.
+  void begin();                                  // start I2C
   void wakePulse(uint16_t lowMs = 200, bool useOpenDrainIfAvailable = true);
+  bool waitForOnline();                          // ping until ACK or timeout
 
-  // Poll until the Pi ACKs its I2C address, or timeout.
-  bool waitForOnline();
-
-  // Run the full transaction: (optional wake) → command 0x01 →
-  // poll length (0x11) → chunked reads (0x12) → finalize (0xEE).
-  // Returns payload string on success, or "ERR_*" on failure.
-  String captureOnce(bool doWakeFirst = true);
+  String        captureRaw(bool doWakeFirst = true);     // returns payload or "ERR_*"
+  CaptureParsed captureParsed(bool doWakeFirst = true);  // parses COUNT/S1/S2/S3
 
 private:
   // Config
@@ -43,17 +43,18 @@ private:
   uint16_t chunkBytes_;
 
   // Helpers
-  bool   i2cPing_(uint8_t addr);
-  size_t i2cReadExact_(uint8_t addr, uint8_t* buf, size_t n);
-  uint16_t readLengthBE_();                     // issues 0x11; returns 0 on failure/invalid
-  bool  readPayloadChunked_(uint16_t totalLen, std::vector<uint8_t>& out); // uses 0x12
-  void  tellPiDone_();                          // sends 0xEE
+  bool     i2cPing_(uint8_t addr);
+  size_t   i2cReadExact_(uint8_t addr, uint8_t* buf, size_t n);
+  uint16_t readLengthBE_();                                  // sends 0x11
+  bool     readPayloadChunked_(uint16_t totalLen, std::vector<uint8_t>& out); // uses 0x12
+  void     tellPiDone_();                                    // sends 0xEE
+  static String getField_(const String& payload, const char* key);
 
-  // Commands (protocol)
-  static constexpr uint8_t CMD_START   = 0x01;  // trigger capture/analyze
-  static constexpr uint8_t CMD_LENGTH  = 0x11;  // request 2B big-endian length
-  static constexpr uint8_t CMD_READ    = 0x12;  // request chunk (len_hi, len_lo, off_hi, off_lo)
-  static constexpr uint8_t CMD_DONE    = 0xEE;  // done / allow shutdown
+  // Protocol bytes
+  static constexpr uint8_t CMD_START  = 0x01;  // trigger capture/analyze
+  static constexpr uint8_t CMD_LENGTH = 0x11;  // request 2B big-endian length
+  static constexpr uint8_t CMD_READ   = 0x12;  // request chunk (len,offset)
+  static constexpr uint8_t CMD_DONE   = 0xEE;  // done/allow shutdown
 };
 
 #endif
