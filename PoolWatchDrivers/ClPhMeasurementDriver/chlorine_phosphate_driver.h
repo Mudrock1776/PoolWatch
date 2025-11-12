@@ -11,12 +11,15 @@ class chlorine_phoshpate_driver
 		chlorine_phoshpate_driver(uint8_t Clpin);
     	void begin(); 
 		void on();
-    	void off(); 
+    	void off();
+		float ClConcentration();
+		float PConcentration();
   
     private:
 		uint8_t _PDpin;
 		
 };
 extern bool DEBUG;
+
 
 #endif
