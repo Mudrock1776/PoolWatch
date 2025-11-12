@@ -1,17 +1,6 @@
 #include "chlorine_phosphate_driver.h"
-const float molarAbsorptivityCl = 22000.0f;  // ε in L·mol⁻¹·cm⁻¹
-const float pathLength = 1.0f;             // optical path in cm
-const float molarMassCl = 147.20f;           // g/mol
-const float molarAbsorptivityP = 12140.0f;  // ε in L·mol⁻¹·cm⁻¹
-const float molarMassP = 115.03f;           // g/mol
-bool DEBUG = true;
-bool INVERT_SIGNAL = false; 
-int darkOffsetP = 0;
-int darkOffsetCl = 0;
-const int SAMPLE_COUNT = 32;
-const int DISCARD = 3;
 
-chlorine_phosphate_driver::chlorine_phosphate_driver(uint8_t Clpin, uint8_t Ppin){
+chlorine_phoshpate_driver::chlorine_phoshpate_driver(uint8_t Clpin, uint8_t Ppin){
   _pdClPin = Clpin; 
   _pdPPin = Ppin;
 }
@@ -20,7 +9,7 @@ int readAvg(int photoPin) {
   static uint16_t s[SAMPLE_COUNT];
   for (int i=0;i<SAMPLE_COUNT;i++){
     int r = analogRead(photoPin);
-    if (INVERT_SIGNAL) r = ADC_MAX - r;
+    if (false) r = ADC_MAX - r;
     s[i]=r;
     delay(2);
   }
@@ -35,7 +24,7 @@ int readAvg(int photoPin) {
   return cnt? (int)(sum/cnt) : 0;
 }
 
-void chlorine_phosphate_driver::begin(){
+void chlorine_phoshpate_driver::begin(){
   analogReadResolution(12);
   analogSetPinAttenuation(_pdClPin, ADC_11db);
   analogSetPinAttenuation(_pdPPin, ADC_11db);
@@ -43,7 +32,7 @@ void chlorine_phosphate_driver::begin(){
   darkOffsetP = readAvg(_pdPPin);
 }
 
-float chlorine_phosphate_driver::ClConcentration(){
+float chlorine_phoshpate_driver::ClConcentration(){
   int raw = readAvg(_pdClPin);
   int sampleCorr = raw - darkOffsetCl;
   if (sampleCorr < 0) sampleCorr = 0;
@@ -67,7 +56,7 @@ float chlorine_phosphate_driver::ClConcentration(){
   return concentration; 
 }
 
-float chlorine_phosphate_driver::PConcentration(){
+float chlorine_phoshpate_driver::PConcentration(){
   int raw = readAvg(_pdPPin);
   int sampleCorr = raw - darkOffsetP;
   if (sampleCorr < 0) sampleCorr = 0;
