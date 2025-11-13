@@ -1,41 +1,38 @@
 #include "esp32_I2C.h"
 #include <cstring> // strlen
 
-PiI2CMaster::PiI2CMaster(uint8_t  piAddr,
-                         int      sdaPin,
-                         int      sclPin,
-                         int      wakePin,
-                         uint32_t i2cHz,
-                         uint32_t bootTimeoutMs,
-                         uint32_t procTimeoutMs,
-                         uint16_t chunkBytes)
-: piAddr_(piAddr),
+// Singleton used by Wire callbacks
+PiI2CSlaveCapture* PiI2CSlaveCapture::self_ = nullptr;
+
+PiI2CSlaveCapture::PiI2CSlaveCapture(uint8_t addr,
+                                     int sdaPin,
+                                     int sclPin,
+                                     int wakePin,
+                                     uint32_t i2cHz,
+                                     uint32_t captureTimeoutMs)
+: addr_(addr),
   sdaPin_(sdaPin),
   sclPin_(sclPin),
   wakePin_(wakePin),
   i2cHz_(i2cHz),
-  bootTimeoutMs_(bootTimeoutMs),
-  procTimeoutMs_(procTimeoutMs),
-  chunkBytes_(chunkBytes) {}
+  captureTimeoutMs_(captureTimeoutMs) {}
 
-void PiI2CMaster::begin() {
-  Wire.begin(sdaPin_, sclPin_, i2cHz_);
+// Initialize ESP32 as I2C SLAVE at addr_
+bool PiI2CSlaveCapture::begin() {
+  self_ = this; // register singleton for callbacks
+
+  // Register Wire callbacks *before* begin for safety
+  Wire.onReceive(onReceiveThunk);
+  Wire.onRequest(onRequestThunk);
+
+  // ESP32-specific Wire.begin overload for SLAVE: (addr, SDA, SCL, freq)
+  return Wire.begin(addr_, sdaPin_, sclPin_, i2cHz_);
 }
 
-void PiI2CMaster::wakePulse(uint16_t lowMs, bool useOpenDrainIfAvailable) {
-#if defined(OUTPUT_OPEN_DRAIN)
-  if (useOpenDrainIfAvailable) {
-    pinMode(wakePin_, OUTPUT_OPEN_DRAIN);
-    digitalWrite(wakePin_, HIGH); // release (OD = Hi-Z)
-  } else {
-    pinMode(wakePin_, OUTPUT);
-    digitalWrite(wakePin_, HIGH);
-  }
-#else
-  (void)useOpenDrainIfAvailable;
-  pinMode(wakePin_, OUTPUT);
-  digitalWrite(wakePin_, HIGH);   // idle (Pi pulls up)
-#endif
+// Wake Pi from halt by pulsing GPIO (wired to Pi GPIO3)
+void PiI2CSlaveCapture::wakePi(uint16_t lowMs) {
+  // Release first so Pi's pull-up holds line high
+  pinMode(wakePin_, INPUT_PULLUP);
   delay(10);
   digitalWrite(wakePin_, LOW);    // pull Pi GPIO3 low to wake
   delay(lowMs);                   // ~150–200 ms reliable
