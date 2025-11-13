@@ -65,7 +65,6 @@ Some simple messages are provided for testing in /test. Run the script deviceMim
 
 #### Developing ####
 
-
 ### System administration and DevOps ###
 Requirements:
 - Access to an RKE2 cluster (would be on a linux machine)
@@ -84,16 +83,14 @@ Use the helm chart in /devInfastructure and update the values to suite you also 
 use the helm chart in /PoolWatch, and update the values to reflect your needs.
 
 ##### TODO #####
-- Add the notification system
-- Add deletion capabilities
 - Format website to look presentable
 - fix the token error
 - limit device adding capabilities to existing devices
-- add search capabilities
-- make reports appear without refreshing the page.
 - check time since last status to see device connectivity
 - maybe one day make this phone compatiable
-- maybe one day care about security
 
-##### Contributers (Write code if you want to be in this) #####
+##### Contributers #####
 - Dylan Hughes
+- Ning Dim
+- Austin Naugle
+- Jason Ser

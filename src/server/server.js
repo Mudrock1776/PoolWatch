@@ -7,6 +7,12 @@ if (process.env.WEB_PORT == null){
     process.env.WEB_PORT = 8080;
 }
 
+if (process.env.DISCONNECT_TIMEOUT == null){
+    process.env.DISCONNECT_TIMEOUT = 60000;
+} else {
+    process.env.DISCONNECT_TIMEOUT = Number(process.env.DISCONNECT_TIMEOUT);
+}
+
 const Db = require("./DBconn");
 
 app.use(cors());
