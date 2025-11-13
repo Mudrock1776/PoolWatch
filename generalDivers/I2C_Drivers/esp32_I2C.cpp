@@ -1,188 +1,169 @@
 #include "esp32_I2C.h"
 #include <cstring> // strlen
 
-PiI2CMaster::PiI2CMaster(uint8_t  piAddr,
-                         int      sdaPin,
-                         int      sclPin,
-                         int      wakePin,
-                         uint32_t i2cHz,
-                         uint32_t bootTimeoutMs,
-                         uint32_t procTimeoutMs,
-                         uint16_t chunkBytes)
-: piAddr_(piAddr),
+// Singleton used by Wire callbacks
+PiI2CSlaveCapture* PiI2CSlaveCapture::self_ = nullptr;
+
+PiI2CSlaveCapture::PiI2CSlaveCapture(uint8_t addr,
+                                     int sdaPin,
+                                     int sclPin,
+                                     int wakePin,
+                                     uint32_t i2cHz,
+                                     uint32_t captureTimeoutMs)
+: addr_(addr),
   sdaPin_(sdaPin),
   sclPin_(sclPin),
   wakePin_(wakePin),
   i2cHz_(i2cHz),
-  bootTimeoutMs_(bootTimeoutMs),
-  procTimeoutMs_(procTimeoutMs),
-  chunkBytes_(chunkBytes) {}
+  captureTimeoutMs_(captureTimeoutMs) {}
 
-void PiI2CMaster::begin() {
-  Wire.begin(sdaPin_, sclPin_, i2cHz_);
+// Initialize ESP32 as I2C SLAVE at addr_
+bool PiI2CSlaveCapture::begin() {
+  self_ = this; // register singleton for callbacks
+
+  // Register Wire callbacks *before* begin for safety
+  Wire.onReceive(onReceiveThunk);
+  Wire.onRequest(onRequestThunk);
+
+  // ESP32-specific Wire.begin overload for SLAVE: (addr, SDA, SCL, freq)
+  return Wire.begin(addr_, sdaPin_, sclPin_, i2cHz_);
 }
 
-void PiI2CMaster::wakePulse(uint16_t lowMs, bool useOpenDrainIfAvailable) {
-#if defined(OUTPUT_OPEN_DRAIN)
-  if (useOpenDrainIfAvailable) {
-    pinMode(wakePin_, OUTPUT_OPEN_DRAIN);
-    digitalWrite(wakePin_, HIGH); // release (OD = Hi-Z)
-  } else {
-    pinMode(wakePin_, OUTPUT);
-    digitalWrite(wakePin_, HIGH);
-  }
-#else
-  (void)useOpenDrainIfAvailable;
-  pinMode(wakePin_, OUTPUT);
-  digitalWrite(wakePin_, HIGH);   // idle (Pi pulls up)
-#endif
+// Wake Pi from halt by pulsing GPIO (wired to Pi GPIO3)
+void PiI2CSlaveCapture::wakePi(uint16_t lowMs) {
+  // Release first so Pi's pull-up holds line high
+  pinMode(wakePin_, INPUT_PULLUP);
   delay(10);
-  digitalWrite(wakePin_, LOW);    // pull Pi GPIO3 low to wake
-  delay(lowMs);                   // ~150–200 ms reliable
-  digitalWrite(wakePin_, HIGH);   // release
+
+  // Pull low to wake (Pi monitors GPIO3 a.k.a SCL on header)
+  pinMode(wakePin_, OUTPUT);
+  digitalWrite(wakePin_, LOW);
+  delay(lowMs);
+
+  // Release back to Hi-Z (with pull-up)
+  pinMode(wakePin_, INPUT_PULLUP);
 }
 
-bool PiI2CMaster::i2cPing_(uint8_t addr) {
-  Wire.beginTransmission(addr);
-  return (Wire.endTransmission() == 0);
+// Request Pi shutdown by pulsing the same pin low again
+void PiI2CSlaveCapture::shutdownPi(uint16_t lowMs) {
+  // Same pulse pattern; when Pi is ON and gpio-shutdown overlay is active,
+  // this falling edge requests a shutdown.
+wakePi(lowMs);
 }
 
-bool PiI2CMaster::waitForOnline() {
-  uint32_t t0 = millis();
-  while (millis() - t0 < bootTimeoutMs_) {
-    if (i2cPing_(piAddr_)) return true;
-    delay(200);
+// Block until Pi has written one payload or timeout
+CaptureParsed PiI2CSlaveCapture::waitForCapture() {
+  unsigned long t0 = millis();
+  while (!havePayload_ && (millis() - t0 < captureTimeoutMs_)) {
+    delay(50); // allow callbacks to run
   }
-  return false;
-}
 
-size_t PiI2CMaster::i2cReadExact_(uint8_t addr, uint8_t* buf, size_t n) {
-  size_t got = 0;
-  while (got < n) {
-    size_t left  = n - got;
-    size_t chunk = (left < chunkBytes_) ? left : chunkBytes_;
-    size_t r = Wire.requestFrom((int)addr, (int)chunk, (int)true);
-    for (size_t i = 0; i < r && got < n; ++i) buf[got++] = Wire.read();
-    if (r == 0) break;
+  if (!havePayload_) {
+    CaptureParsed err;
+    err.ok    = false;
+    err.error = "ERR_TIMEOUT";
+    return err;
   }
-  return got;
+
+  noInterrupts();
+  String copy = payload_;
+  havePayload_ = false;
+  interrupts();
+
+  return parse_(copy);
 }
 
-uint16_t PiI2CMaster::readLengthBE_() {
-  Wire.beginTransmission(piAddr_);
-  Wire.write(CMD_LENGTH);
-  Wire.endTransmission();
-
-  uint8_t len2[2] = {0,0};
-  if (i2cReadExact_(piAddr_, len2, 2) != 2) return 0;
-
-  uint16_t L = ((uint16_t)len2[0] << 8) | len2[1];
-  if (L == 0 || L >= 4096) return 0; // sanity
-  return L;
+// Convenience helper: wake then wait
+CaptureParsed PiI2CSlaveCapture::captureOnce(uint16_t wakeLowMs) {
+  wakePi(wakeLowMs);
+  return waitForCapture();
 }
 
-bool PiI2CMaster::readPayloadChunked_(uint16_t totalLen, std::vector<uint8_t>& out) {
-  out.clear();
-  out.reserve(totalLen);
-  uint16_t offset = 0;
+String PiI2CSlaveCapture::lastRaw() const {
+  return payload_;
+}
 
-  while (offset < totalLen) {
-    uint16_t left = totalLen - offset;
-    uint16_t want = (left < chunkBytes_) ? left : chunkBytes_;
+void PiI2CSlaveCapture::clearPayload() {
+  noInterrupts();
+  payload_    = "";
+  havePayload_ = false;
+  interrupts();
+}
 
-    Wire.beginTransmission(piAddr_);
-    Wire.write(CMD_READ);
-    Wire.write((uint8_t)(want   >> 8));
-    Wire.write((uint8_t)(want   & 0xFF));
-    Wire.write((uint8_t)(offset >> 8));
-    Wire.write((uint8_t)(offset & 0xFF));
-    Wire.endTransmission();
+// ---------- Wire callback plumbing ----------
 
-    size_t got = Wire.requestFrom((int)piAddr_, (int)want);
-    if (got != want) {
-      // Drain any bytes that did arrive (for debugging) then fail
-      for (size_t i = 0; i < got; ++i) out.push_back(Wire.read());
-      return false;
-    }
-    for (size_t i = 0; i < got; ++i) out.push_back(Wire.read());
-    offset += want;
+void PiI2CSlaveCapture::onReceiveThunk(int numBytes) {
+  if (self_) self_->onReceive_(numBytes);
+}
+
+void PiI2CSlaveCapture::onRequestThunk() {
+  if (self_) self_->onRequest_();
+}
+
+// Called each time the Pi (master) writes to this slave
+void PiI2CSlaveCapture::onReceive_(int /*numBytes*/) {
+  // Read everything for this transaction into payload_
+  payload_ = "";
+  while (Wire.available()) {
+    payload_ += char(Wire.read());
   }
-  return (out.size() == totalLen);
+  havePayload_ = true;
 }
 
-void PiI2CMaster::tellPiDone_() {
-  Wire.beginTransmission(piAddr_);
-  Wire.write(CMD_DONE);
-  Wire.endTransmission();
+// Not used currently (Pi isn't reading from ESP32)
+void PiI2CSlaveCapture::onRequest_() {
+  // If later you want Pi to read from ESP32, use Wire.write() here.
 }
 
-String PiI2CMaster::getField_(const String& payload, const char* key) {
+// ---------- Parsing helpers ----------
+
+String PiI2CSlaveCapture::getField_(const String& payload, const char* key) {
   int k = payload.indexOf(key);
   if (k < 0) return String();
-  int start = k + (int)strlen(key);
-  int end = payload.indexOf(';', start);
+  int start = k + int(strlen(key));
+  int end   = payload.indexOf(';', start);
   if (end < 0) end = payload.length();
   return payload.substring(start, end);
 }
 
-String PiI2CMaster::captureRaw(bool doWakeFirst) {
-  if (doWakeFirst) {
-    wakePulse(); // harmless if Pi already up
-  }
-
-  // Ensure I2C is initialized (for robustness)
-  Wire.begin(sdaPin_, sclPin_, i2cHz_);
-
-  // Wait for the Pi’s I2C slave to respond
-  if (!waitForOnline()) {
-    return String("ERR_PI_OFFLINE");
-  }
-
-  // Command: start capture/analyze
-  Wire.beginTransmission(piAddr_);
-  Wire.write(CMD_START);
-  Wire.endTransmission();
-
-  // Poll for length up to procTimeoutMs_
-  uint16_t totalLen = 0;
-  {
-    uint32_t t0 = millis();
-    while (millis() - t0 < procTimeoutMs_) {
-      totalLen = readLengthBE_();
-      if (totalLen) break;
-      delay(100);
-    }
-  }
-  if (!totalLen) return String("ERR_NO_LENGTH");
-
-  // Read payload in chunks
-  std::vector<uint8_t> buf;
-  if (!readPayloadChunked_(totalLen, buf)) {
-    return String("ERR_SHORT_READ");
-  }
-
-  // Tell Pi we’re done
-  tellPiDone_();
-
-  // Convert to String (CSV/text expected)
-  String payload; payload.reserve(totalLen + 1);
-  for (auto b : buf) payload += (char)b;
-  return payload;
-}
-
-CaptureParsed PiI2CMaster::captureParsed(bool doWakeFirst) {
+CaptureParsed PiI2CSlaveCapture::parse_(const String& payload) {
   CaptureParsed out;
-  String payload = captureRaw(doWakeFirst);
-  if (payload.startsWith("ERR_")) {
-    out.ok = false;
-    out.error = payload;
+  out.raw = payload;
+
+  // Numeric payload from Pi: COUNT,int;S1,num;S2,num;S3,num;
+  String countStr = getField_(payload, "COUNT,");
+  if (!countStr.length()) {
+    out.ok    = false;
+    out.error = "ERR_BAD_PAYLOAD";
     return out;
   }
-  out.raw   = payload;
-  out.count = getField_(payload, "COUNT,").toInt();
-  out.s1    = getField_(payload, "S1,");
-  out.s2    = getField_(payload, "S2,");
-  out.s3    = getField_(payload, "S3,");
-  out.ok    = true;
+
+  out.count = countStr.toInt();
+
+  // Extract numeric percentages as strings
+  String s1NumStr = getField_(payload, "S1,");
+  String s2NumStr = getField_(payload, "S2,");
+  String s3NumStr = getField_(payload, "S3,");
+
+  // Convert to floats and reformat to 2 decimal places
+  float p1 = s1NumStr.toFloat();
+  float p2 = s2NumStr.toFloat();
+  float p3 = s3NumStr.toFloat();
+
+  String p1Fmt = String(p1, 2);
+  String p2Fmt = String(p2, 2);
+  String p3Fmt = String(p3, 2);
+
+  // Reconstruct descriptive strings on the ESP32
+  out.s1 = "Percentage of Particles <63 microns: " +
+           p1Fmt + "% (Likely Pollen or Algae)";
+
+  out.s2 = "Percentage of Particles 63–125 microns: " +
+           p2Fmt + "% (Likely Fine Sands)";
+
+  out.s3 = "Percentage of Particles >125 microns: " +
+           p3Fmt + "% (Likely Coarse Sands)";
+
+  out.ok = true;
   return out;
 }
