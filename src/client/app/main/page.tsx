@@ -118,7 +118,7 @@ export default function Page() {
         <Sidebar open={sidebarOpen} />
         <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
           <TopMenu onToggleSidebar={() => setSidebarOpen((prevOpen) => !prevOpen)}/>
-          <div className="grid ]grid-cols-1 lg:grid-cols-3 gap-4 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
             <div className="bg-white rounded-lg shadow p-4 h-full relative">
               <h2 className="text-xl font-semibold">Chlorine</h2>
               <img src="/TestProcedureP.png"alt="Chlorine Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
@@ -186,28 +186,28 @@ export default function Page() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-6 py-3 border border-gray-200 text-center">10 - 20 µm</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center"> &gt; 250 µm</td>
                     <td className="px-6 py-3 border border-gray-200 text-center">
-                      <span className="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Large</span>
+                      <span className="inline-flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full transition-all duration-200 hover:bg-green-200 hover:scale-105">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Coarse Sands</span>
                     </td>
-                    <td className="px-6 py-3 border border-gray-200">51 - 100</td>
+                    <td className="px-6 py-3 border border-gray-200">7</td>
                     </tr>
                     <tr>
-                      <td className="px-6 py-3 border border-gray-200 text-center">5 - 10</td>
+                      <td className="px-6 py-3 border border-gray-200 text-center">63µm - 250µm</td>
                       <td className="px-6 py-3 border border-gray-200 text-center">
-                      <span className="inline-flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
-                        <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>Medium</span>
+                      <span className="inline-flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full transition-all duration-200 hover:bg-orange-200 hover:scale-105">
+                        <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>Fine Sands</span>
                     </td>
-                    <td className="px-6 py-3 border border-gray-200 text-center">26 - 50</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">62</td>
                   </tr>
                   <tr>
-                    <td className="px-6 py-3 border border-gray-200 text-center">0 - 5</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">10µm - 63µm</td>
                     <td className="px-6 py-3 border border-gray-200 text-center">
-                      <span className="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-full">
-                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>Small</span>
+                      <span className="inline-flex items-center bg-red-100 text-red-700 px-3 py-1 rounded-full transition-all duration-200 hover:bg-orange-200 hover:scale-105">
+                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>Pollen/Algae</span>
                     </td>
-                    <td className="px-6 py-3 border border-gray-200 text-center">0 - 25</td>
+                    <td className="px-6 py-3 border border-gray-200 text-center">15</td>
                   </tr>
                 </tbody>
               </table>
