@@ -121,11 +121,11 @@ export default function Page() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
             <div className="bg-white rounded-lg shadow p-4 h-full relative">
               <h2 className="text-xl font-semibold">Chlorine</h2>
-              <img src="/TestProcedureP.png"alt="Chlorine Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
+              <img src="/TestProcedureC.png"alt="Chlorine Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
             </div>
             <div className="bg-white rounded-lg shadow p-4 h-full relative">
               <h2 className="text-xl font-semibold">Phosphate</h2>
-              <img src="/TestProcedure2.png"alt="Phosphate Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
+              <img src="/TestProcedureP.png"alt="Phosphate Test Procedure"className="mt-4 rounded-lg object-contain w-full h-[20rem] hover:scale-[1.02] transition-transform duration-200"/>
               <div className="mt-4">
                 <p className="text-gray-700 mb-2">Watch the guide on how to perform the phosphate test.</p>
                 <button type="button"onClick={() => setShowVideo(true)}className="inline-block px-4 py-2 rounded bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors duration-200">View Test Procedure</button>
