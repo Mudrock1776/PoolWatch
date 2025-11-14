@@ -33,7 +33,7 @@ PiI2CSlaveCapture slave(ESP_I2C_ADDR, SDA_PIN, SCL_PIN, WAKE_PIN, I2C_HZ, CAPTUR
 char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
 char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
 int SERVER_PORT = 80;
-int DEVICE_SERIAL = 2;
+int DEVICE_SERIAL = 3; //blank slate for testing 
 unsigned long int StatusDelay = 5000;
 bool DEBUG = true;
 bool CuvvettesFull;
