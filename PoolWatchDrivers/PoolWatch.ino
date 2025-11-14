@@ -4,17 +4,37 @@
 #include "LEDDriver.h"
 #include "DebugPanelDrivers.h"
 #include "BatteryMonitor.h"
+#include "esp32_I2C.h"
+#include "chlorine_phosphate_driver.h"
 
 
 
-char *WIFI_SSID = ""; //Your wifi name
-char *WIFI_PASSWORD = ""; //Your wifi password
+char *WIFI_SSID = "Greggu"; //Your wifi name
+char *WIFI_PASSWORD = "Group4is"; //Your wifi password
 
-char *SERVER_HOST = ""; //This would be the hostname of the website
-char *SERVER_IP = ""; //This is needed for my tests with my home webserver
+
+// ================= USER CONFIG =================
+static const uint8_t  ESP_I2C_ADDR    = 0x13;     // ESP32 I2C SLAVE address (Pi writes here)
+static const int      SDA_PIN         = 22;       // ESP32 SDA  -> Pi GPIO2 (pin 3)
+static const int      SCL_PIN         = 23;       // ESP32 SCL  -> Pi GPIO3 (pin 5)
+static const int      WAKE_PIN        = 15;       // ESP32 WAKE -> Pi GPIO3 (same pin 5)
+static const uint32_t I2C_HZ          = 100000;   // 100 kHz (Pi default)
+static const uint32_t CAPTURE_TIMEOUT = 60000;   // 1 minutes
+
+// LED: HIGH when program starts / capture in progress,
+// LOW after Pi shutdown pulse is sent
+static const int      LED_PIN         = 19;        // change to whatever GPIO your LED is on
+// =================================================
+
+// Create the slave-capture object
+PiI2CSlaveCapture slave(ESP_I2C_ADDR, SDA_PIN, SCL_PIN, WAKE_PIN, I2C_HZ, CAPTURE_TIMEOUT);
+
+
+char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
+char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
 int SERVER_PORT = 80;
-int DEVICE_SERIAL = 1;
-unsigned long int StatusDelay = 100000;
+int DEVICE_SERIAL = 2;
+unsigned long int StatusDelay = 5000;
 bool DEBUG = true;
 bool CuvvettesFull;
 bool pumpEverRan = false; // has pump ever run since boot/reset
@@ -36,10 +56,13 @@ unsigned long pumpMs = 5000;  // 5s
 unsigned long solenoidMs = 2000;  
 unsigned long stirrerMs = 5000; 
 //wait time b/w phosphate reagent dispensing 
-unsigned long phosphateWait = 120000; //2min 
+unsigned long phosphateWait = 90000; //1min 30 sec 
 unsigned long phosphateWait2 = 60000;//1min
 //Spacing Delays b/w operations
 unsigned long loadingDelay = 15000;  // 15 pause b/w reagent loading
+LEDDriver chlorineLED(CL_PIN);  
+LEDDriver phosphateLED(P_PIN); 
+chlorine_phoshpate_driver ConcentrationGetter(photoPin_cl, photoPin_ph);
 
 float statusOutput[5];
 
@@ -133,16 +156,20 @@ void runPhosphateSequence() {
     if (DEBUG) {
       Serial.println("Stirrer OFF");
     }
-  //Wait 2 min b/f adding next reagent 
+  //Wait 1.30 min b/f adding next reagent 
   if (phosphateWait > 0) {
     if (DEBUG) {
-      Serial.println("Waiting 2 min before second phosphate reagent...");
+      Serial.println("Waiting 1 min 30 sec before second phosphate reagent...");
     }
       unsigned long startWait = millis();
     while (millis() - startWait < phosphateWait) {
       delay(10);
     }
   }
+  if (DEBUG) {
+      Serial.println("Wait 30 sec)");
+  }
+  delay(30000) 
     if (DEBUG) {
       Serial.println("Solenoid 2 ON (phosphate reagent 2)");
     }
@@ -193,7 +220,23 @@ void setup() {
   solenoid1.setPins();
   solenoid2.setPins(); 
   tempSensor.begin();
+  pinMode(LED_PIN, OUTPUT);
+  if (!slave.begin()) {
+    Serial.println("[ESP] I2C slave init FAILED");
+    // Leave LED on as an error indicator
+    return;
+  } else {
+    Serial.print("[ESP] I2C slave init OK, addr 0x");
+    Serial.println(ESP_I2C_ADDR, HEX);
+  }
   CuvvettesFull = false;
+  chlorineLED.begin();
+  phosphateLED.begin();
+
+  chlorineLED.off();
+  phosphateLED.off();
+  ConcentrationGetter.begin();
+  delay(1000);
 }
 
 void loop() {
@@ -205,10 +248,15 @@ void loop() {
 
   PoolWatchWebDrivers.sendStatus(batteryCharge, true, false, true, statusOutput);
   if(statusOutput[0] != 0){
-    if (statusOutput[1]){
-      runChlorineSequence();
-      //Run Chlorine Test
-      CLCon = 0;
+    if (statusOutput[4]){
+      //Run Particulate Test
+      isCuvvettesFilled();
+      digitalWrite(LED_PIN, HIGH);
+      CaptureParsed res = slave.captureOnce(/*wakeLowMs=*/500);
+      PartAmount = res.count;
+      PartSize = res.s1 + ", " + res.s2 + ", " + res.s3;
+      digitalWrite(LED_PIN, LOW);
+      
     }
     if (statusOutput[2]){
       runPhosphateSequence();
@@ -219,11 +267,12 @@ void loop() {
       //Run Temperature Test
       tempF = tempSensor.getTempF();
     }
-    if (statusOutput[4]){
-      //Run Particulate Test
-      isCuvvettesFilled(); 
-      PartAmount = 0;
-      PartSize = "small";
+    if (statusOutput[1]){
+      runChlorineSequence();
+      //Run Chlorine Test
+      chlorineLED.on();
+      CLCon = ConcentrationGetter.ClConcentration();
+      chlorineLED.off();
     }
     PoolWatchWebDrivers.sendReport(tempF, CLCon, PCon, PartAmount, PartSize);
   }
