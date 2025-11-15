@@ -34,13 +34,16 @@ void chlorine_phoshpate_driver::begin(){
 
 float chlorine_phoshpate_driver::ClConcentration(){
   int raw = readAvg(_pdClPin);
-  int sampleCorr = raw - darkOffsetCl;
+  Serial.println(raw);
+  int sampleCorr = darkOffsetCl- raw;
+  Serial.println(sampleCorr);
   if (sampleCorr < 0) sampleCorr = 0;
-  float I0corr = max(EPSILON, referenceIntensity - (float)darkOffsetCl);
-  float Isample_corr_f = (float)sampleCorr;
+  float I0corr = max(EPSILON, referenceIntensity - darkOffsetCl);
+  float Isample_corr_f = referenceIntensity - sampleCorr; //(float)sampleCorr;
+  I0corr = referenceIntensity - I0corr;
   float intensityRatio = 1.0f;
   float A = 0.0f;
-
+  Serial.println(Isample_corr_f);
   if (Isample_corr_f >= MIN_THRESH && I0corr > EPSILON) {
     intensityRatio = Isample_corr_f / I0corr;
     if (intensityRatio < EPSILON) intensityRatio = EPSILON;
@@ -49,6 +52,8 @@ float chlorine_phoshpate_driver::ClConcentration(){
     if (A < 0) A = 0;
   } else {
     // insufficient signal
+    Serial.println("Not Working");
+    Serial.println(I0corr);
     intensityRatio = (I0corr>EPSILON) ? (Isample_corr_f / I0corr) : 1.0f;
     A = 0.0f;
   }
@@ -57,18 +62,23 @@ float chlorine_phoshpate_driver::ClConcentration(){
 }
 
 float chlorine_phoshpate_driver::PConcentration(){
+  Serial.println("we started");
   int raw = readAvg(_pdPPin);
-  int sampleCorr = raw - darkOffsetP;
+  int sampleCorr = darkOffsetP - raw;
   if (sampleCorr < 0) sampleCorr = 0;
-  float I0corr = max(EPSILON, referenceIntensity - (float)darkOffsetP);
-  float Isample_corr_f = (float)sampleCorr;
+  float I0corr = max(EPSILON, referenceIntensity - darkOffsetP);
+  float Isample_corr_f = referenceIntensity - sampleCorr;
+  I0corr = referenceIntensity - I0corr;
   float intensityRatio = 1.0f;
   float A = 0.0f;
 
   if (Isample_corr_f >= MIN_THRESH && I0corr > EPSILON) {
+    Serial.println("intensisty Crap");
     intensityRatio = Isample_corr_f / I0corr;
+    Serial.println(intensityRatio);
     if (intensityRatio < EPSILON) intensityRatio = EPSILON;
     if (intensityRatio > 1.0f) intensityRatio = 1.0f;
+    Serial.println(intensityRatio);
     A = log10(1.0f / intensityRatio);
     if (A < 0) A = 0;
   } else {
@@ -76,6 +86,7 @@ float chlorine_phoshpate_driver::PConcentration(){
     intensityRatio = (I0corr>EPSILON) ? (Isample_corr_f / I0corr) : 1.0f;
     A = 0.0f;
   }
-   float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
+  Serial.println(A);
+  float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
 }
 
