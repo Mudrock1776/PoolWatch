@@ -33,7 +33,7 @@ PiI2CSlaveCapture slave(ESP_I2C_ADDR, SDA_PIN, SCL_PIN, WAKE_PIN, I2C_HZ, CAPTUR
 char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
 char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
 int SERVER_PORT = 80;
-int DEVICE_SERIAL = 3; //blank slate for testing 
+int DEVICE_SERIAL = 3;
 unsigned long int StatusDelay = 5000;
 bool DEBUG = true;
 bool CuvvettesFull;
@@ -52,14 +52,14 @@ Relay stirrer(RELAY4PIN);
 
 
 //Relay On Timings 
-unsigned long pumpMs = 5000;  // 5s
+unsigned long pumpMs = 3000;  // 5s
 unsigned long solenoidMs = 2000;  
 unsigned long stirrerMs = 5000; 
 //wait time b/w phosphate reagent dispensing 
 unsigned long phosphateWait = 90000; //1min 30 sec 
 unsigned long phosphateWait2 = 60000;//1min
 //Spacing Delays b/w operations
-unsigned long loadingDelay = 15000;  // 15 pause b/w reagent loading
+unsigned long loadingDelay = 0; //15000;  // 15 pause b/w reagent loading
 LEDDriver chlorineLED(CL_PIN);  
 LEDDriver phosphateLED(P_PIN); 
 chlorine_phoshpate_driver ConcentrationGetter(photoPin_cl, photoPin_ph);
@@ -169,7 +169,7 @@ void runPhosphateSequence() {
   if (DEBUG) {
       Serial.println("Wait 30 sec)");
   }
-  delay(30000) 
+  delay(30000);
     if (DEBUG) {
       Serial.println("Solenoid 2 ON (phosphate reagent 2)");
     }
@@ -236,6 +236,7 @@ void setup() {
   chlorineLED.off();
   phosphateLED.off();
   ConcentrationGetter.begin();
+  debugPanelDrivers.setStatus(true, true, true, true);
   delay(1000);
 }
 
@@ -245,7 +246,6 @@ void loop() {
   bool fiveRegulator = debugPanelDrivers.get5RegStatus();
   bool twelveRegulator = debugPanelDrivers.get12RegStatus();
   bool pumpStatus = getPumpHealth();//tie to both 12V regulator being ok and if pump ever ran
-
   PoolWatchWebDrivers.sendStatus(batteryCharge, true, false, true, statusOutput);
   if(statusOutput[0] != 0){
     if (statusOutput[4]){
@@ -259,9 +259,12 @@ void loop() {
       
     }
     if (statusOutput[2]){
-      runPhosphateSequence();
+      //runPhosphateSequence();
       //Run Phosphate Test
-      PCon = 0;
+      phosphateLED.on();
+      delay(1000);
+      PCon = 0.7; //ConcentrationGetter.PConcentration();
+      phosphateLED.off();
     }
     if (statusOutput[3]){
       //Run Temperature Test
@@ -271,6 +274,7 @@ void loop() {
       runChlorineSequence();
       //Run Chlorine Test
       chlorineLED.on();
+      delay(1000);
       CLCon = ConcentrationGetter.ClConcentration();
       chlorineLED.off();
     }
