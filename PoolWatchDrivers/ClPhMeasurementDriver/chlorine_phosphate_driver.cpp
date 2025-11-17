@@ -88,5 +88,6 @@ float chlorine_phoshpate_driver::PConcentration(){
   }
   Serial.println(A);
   float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
+  return concentration;
 }
 
