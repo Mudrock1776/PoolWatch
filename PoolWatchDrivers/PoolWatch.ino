@@ -9,8 +9,8 @@
 
 
 
-char *WIFI_SSID = "Greggu"; //Your wifi name
-char *WIFI_PASSWORD = "Group4is"; //Your wifi password
+char *WIFI_SSID = "Greggu";
+char *WIFI_PASSWORD = "Group4is";
 
 
 // ================= USER CONFIG =================
@@ -33,7 +33,7 @@ PiI2CSlaveCapture slave(ESP_I2C_ADDR, SDA_PIN, SCL_PIN, WAKE_PIN, I2C_HZ, CAPTUR
 char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
 char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
 int SERVER_PORT = 80;
-int DEVICE_SERIAL = 3;
+int DEVICE_SERIAL = 1;
 unsigned long int StatusDelay = 5000;
 bool DEBUG = true;
 bool CuvvettesFull;
@@ -263,12 +263,20 @@ void loop() {
       //Run Phosphate Test
       phosphateLED.on();
       delay(1000);
-      PCon = 0.7; //ConcentrationGetter.PConcentration();
+      PCon = ConcentrationGetter.PConcentration();
       phosphateLED.off();
     }
     if (statusOutput[3]){
       //Run Temperature Test
       tempF = tempSensor.getTempF();
+      if (tempF > 150){
+        while (tempF > 150){
+          if (DEBUG){
+            Serial.println("Something Went Wrong with the temperature sensor... Retrying");
+          }
+          tempF = tempSensor.getTempF();
+        }
+      }
     }
     if (statusOutput[1]){
       runChlorineSequence();
