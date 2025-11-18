@@ -78,7 +78,8 @@ exports.createDevice = async (req, res) => {
             testParticulate: false,
             updateServers: [],
             reports: [],
-            lastUpdate: now.getTime()
+            lastUpdate: now.getTime(),
+            lastSample: now.getTime()
         });
         await newDevice.save();
         res.status(200).send({

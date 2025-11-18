@@ -209,3 +209,27 @@ exports.removeUpdateServer = async (req, res) =>{
         res.status(400).send(err);
     }
 }
+
+async function checkSample(){
+    let deviceList = await device.find({});
+    const now = new Date();
+    deviceList.forEach(async deviceItem => {
+        let currTime = now.getTime();
+        let hours = currTime - deviceItem.lastSample;
+        
+        hours = hours / 3600000;
+        console.log(deviceItem.sampleRate)
+        if (hours >= deviceItem.sampleRate) {
+            deviceItem.testChlorine = true;
+            deviceItem.testPhosphate = true;
+            deviceItem.testTempature = true;
+            deviceItem.testParticulate = true;
+            deviceItem.needUpdate = true;
+            deviceItem.lastSample = currTime;
+            await device.findByIdAndUpdate(deviceItem._id, deviceItem);
+        }
+        
+    });
+}
+
+setInterval(checkSample, process.env.SAMPLE_CHECK); 

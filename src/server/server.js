@@ -13,6 +13,12 @@ if (process.env.DISCONNECT_TIMEOUT == null){
     process.env.DISCONNECT_TIMEOUT = Number(process.env.DISCONNECT_TIMEOUT);
 }
 
+if (process.env.SAMPLE_CHECK == null){
+    process.env.SAMPLE_CHECK = 60000;
+} else {
+    process.env.SAMPLE_CHECK = Number(process.env.SAMPLE_CHECK);
+}
+
 const Db = require("./DBconn");
 
 app.use(cors());
