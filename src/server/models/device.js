@@ -18,7 +18,8 @@ const device = new Schema({
     testParticulate: {type: Boolean, required: true},
     updateServers: {type: [notify]},
     reports: {type: [report]},
-    lastUpdate: {type: Number, required: true}
+    lastUpdate: {type: Number, required: true},
+    lastSample: {type: Number, required: true}
 });
 
 module.exports = mongoose.model("device", device);
