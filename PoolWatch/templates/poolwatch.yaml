@@ -29,6 +29,8 @@ spec:
           value: {{ .Values.poolwatch.database }}
         - name: DISCONNECT_TIMEOUT
           value: "{{ .Values.poolwatch.dcTimeout }}"
+        - name: SAMPLE_CHECK
+          value: "{{ .Values.poolwatch.sampleCheckRate }}"
         - name: EMAILPASSWORD
           valueFrom:
             secretKeyRef:

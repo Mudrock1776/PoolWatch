@@ -36,7 +36,13 @@ export default function Page(){
                 })
             });
             setDevice(await res.json());
-            updateForm({sampleRate: device.sampleRate});
+            console.log(device.sampleRate);
+            setForm({
+                type: "email",
+                server: "",
+                when: "",
+                sampleRate: device.sampleRate
+            });
         }
         getDevice();
         const tokenString = localStorage.getItem("PoolWatchtoken");

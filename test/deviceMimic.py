@@ -2,8 +2,8 @@ import socket
 import json
 import time
 
-HOST = 'device.skadi'
-PORT = 8080
+HOST = 'device.necrass'
+PORT = 80
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 with open("./jsonMessages/exist.json","r") as f:

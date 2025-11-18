@@ -3,7 +3,7 @@
     "report": {
         "ClCon": 0.5,
         "PCon": 0.2,
-        "tempature": 82,
+        "tempature": 150,
         "particulateAmount": 2,
         "particulateSize": "Large"
     }

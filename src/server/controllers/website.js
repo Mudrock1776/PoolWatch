@@ -218,7 +218,6 @@ async function checkSample(){
         let hours = currTime - deviceItem.lastSample;
         
         hours = hours / 3600000;
-        console.log(deviceItem.sampleRate)
         if (hours >= deviceItem.sampleRate) {
             deviceItem.testChlorine = true;
             deviceItem.testPhosphate = true;
