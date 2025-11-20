@@ -28,7 +28,7 @@ void chlorine_phoshpate_driver::begin(){
   analogReadResolution(12);
   analogSetPinAttenuation(_pdClPin, ADC_11db);
   analogSetPinAttenuation(_pdPPin, ADC_11db);
-  darkOffsetCl = readAvg(_pdClPin);
+  darkOffsetCl = readAvg(_pdClPin); //takes baselines
   darkOffsetP = readAvg(_pdPPin);
 }
 
@@ -90,4 +90,5 @@ float chlorine_phoshpate_driver::PConcentration(){
   float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
   return concentration;
 }
+
 
