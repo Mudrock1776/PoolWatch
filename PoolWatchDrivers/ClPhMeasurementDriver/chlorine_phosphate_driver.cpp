@@ -28,36 +28,37 @@ void chlorine_phoshpate_driver::begin(){
   analogReadResolution(12);
   analogSetPinAttenuation(_pdClPin, ADC_11db);
   analogSetPinAttenuation(_pdPPin, ADC_11db);
-  darkOffsetCl = readAvg(_pdClPin); //takes baselines
+  darkOffsetCl = readAvg(_pdClPin);
   darkOffsetP = readAvg(_pdPPin);
 }
 
 float chlorine_phoshpate_driver::ClConcentration(){
   int raw = readAvg(_pdClPin);
-  Serial.println(raw);
-  int sampleCorr = darkOffsetCl- raw;
-  Serial.println(sampleCorr);
+  int sampleCorr = darkOffsetCl - raw;
   if (sampleCorr < 0) sampleCorr = 0;
   float I0corr = max(EPSILON, referenceIntensity - darkOffsetCl);
-  float Isample_corr_f = referenceIntensity - sampleCorr; //(float)sampleCorr;
-  I0corr = referenceIntensity - I0corr;
+  float Isample_corr_f = referenceIntensity - sampleCorr; // Beer-Lambert law (I)
   float intensityRatio = 1.0f;
+  I0corr = referenceIntensity - I0corr; // Beer-Lambert Law the I0corr corresponds to (I0)
   float A = 0.0f;
-  Serial.println(Isample_corr_f);
+
   if (Isample_corr_f >= MIN_THRESH && I0corr > EPSILON) {
-    intensityRatio = Isample_corr_f / I0corr;
+    Serial.println(Isample_corr_f);
+    Serial.println(I0corr);
+    intensityRatio = I0corr/Isample_corr_f; // ratio for T
     if (intensityRatio < EPSILON) intensityRatio = EPSILON;
     if (intensityRatio > 1.0f) intensityRatio = 1.0f;
-    A = log10(1.0f / intensityRatio);
+    Serial.println(intensityRatio);
+    A = log10(1.0f / intensityRatio); // absorbance
+    Serial.println(A);
     if (A < 0) A = 0;
   } else {
     // insufficient signal
-    Serial.println("Not Working");
-    Serial.println(I0corr);
     intensityRatio = (I0corr>EPSILON) ? (Isample_corr_f / I0corr) : 1.0f;
     A = 0.0f;
   }
-  float concentration = (A / (molarAbsorptivityCl * pathLength)) * molarMassCl * 1000.0f;
+  Serial.println(A);
+  float concentration = (A / (molarAbsorptivityCl * pathLength*3)) * molarMassCl * 1000.0f*1.29f;
   return concentration; 
 }
 
@@ -67,8 +68,8 @@ float chlorine_phoshpate_driver::PConcentration(){
   int sampleCorr = darkOffsetP - raw;
   if (sampleCorr < 0) sampleCorr = 0;
   float I0corr = max(EPSILON, referenceIntensity - darkOffsetP);
-  float Isample_corr_f = referenceIntensity - sampleCorr;
-  I0corr = referenceIntensity - I0corr;
+  float Isample_corr_f = sampleCorr;
+  I0corr = I0corr;
   float intensityRatio = 1.0f;
   float A = 0.0f;
 
@@ -90,5 +91,3 @@ float chlorine_phoshpate_driver::PConcentration(){
   float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
   return concentration;
 }
-
-
