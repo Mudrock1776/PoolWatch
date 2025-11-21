@@ -44,6 +44,9 @@ void webserver::connectWiFi(char *wifi_ssid, char *wifi_password){
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
+    if (DEBUG){
+      Serial.println("Connecting...");
+    }
     delay(500);
   }
 
@@ -121,6 +124,7 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
   output[2] = 0;
   output[3] = 0;
   output[4] = 0;
+  output[5] = 0;
   if (pumpStatus){
     pumpStatusString = "true";
   } else {
@@ -172,6 +176,7 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
     if (DEBUG){
       Serial.println(testParticulate);
     }
+    String fillWater = pullData(returnedMsg, "\"fillWater\":");
     if (testChlorine == "true"){
       output[1] = 1;
     }
@@ -183,6 +188,9 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
     }
     if (testParticulate == "true"){
       output[4] = 1;
+    }
+    if (fillWater == "true"){
+      output[5] = 1;
     }
     return;
   }

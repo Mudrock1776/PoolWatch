@@ -16,6 +16,7 @@ const device = new Schema({
     testPhosphate: {type: Boolean, required: true},
     testTempature: {type: Boolean, required: true},
     testParticulate: {type: Boolean, required: true},
+    fillWater: {type: Boolean, required: true},
     updateServers: {type: [notify]},
     reports: {type: [report]},
     lastUpdate: {type: Number, required: true},

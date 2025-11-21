@@ -4,9 +4,9 @@ poolwatch:
   database: mongodb://mongo-production-service.poolwatch.svc.cluster.local
   deviceHostname: device.necrass
   hostname: poolswatch.com
-  image: repo.necrass/poolwatch:1.2.1
+  image: repo.necrass/poolwatch:1.3.0
   tlsSecret: necrass-tls
-  dcTimeout: 60000
+  dcTimeout: 300000
   sampleCheckRate: 60000
 
 mongodb:

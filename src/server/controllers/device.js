@@ -76,6 +76,7 @@ exports.createDevice = async (req, res) => {
             testPhosphate: false,
             testTempature: false,
             testParticulate: false,
+            fillWater: false,
             updateServers: [],
             reports: [],
             lastUpdate: now.getTime(),
@@ -218,6 +219,7 @@ exports.statusUpdate = async (req, res) => {
             testPhosphate: modifiedDevice.testPhosphate,
             testTempature: modifiedDevice.testTempature,
             testParticulate: modifiedDevice.testParticulate,
+            fillWater: modifiedDevice.fillWater,
         });
         await device.findOneAndUpdate({serialNumber: req.body.serialNumber},{
             battery: req.body.battery,
@@ -230,6 +232,7 @@ exports.statusUpdate = async (req, res) => {
             testPhosphate: false,
             testTempature: false,
             testParticulate: false,
+            fillWater: false,
             lastUpdate: now.getTime()
         });
     } catch(err){

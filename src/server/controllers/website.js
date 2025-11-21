@@ -160,6 +160,9 @@ exports.requestTest = async (req, res) => {
         if (req.body.testParticulate){
             searchedDevice.testParticulate = true;
         }
+        if (req.body.fillWater){
+            searchedDevice.fillWater = true;
+        }
         searchedDevice.needUpdate = true;
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send();
