@@ -43,7 +43,7 @@ float chlorine_phoshpate_driver::ClConcentration(){
   int raw = readAvg(_pdClPin);
   Serial.println(raw);
   float x = (raw - darkOffsetCl) / baseLineCL; // (sig - DK)/ (sig(0) - DK)
-  x = x; // PUT CALIBRATION CURVE EQUATION HERE FOR CHLORINE
+  x = 87.139*(x**2)-219.7*x+132.69; // PUT CALIBRATION CURVE EQUATION HERE FOR CHLORINE
   return x;
   // int sampleCorr = darkOffsetCl- raw;
   // Serial.println(sampleCorr);
@@ -75,7 +75,7 @@ float chlorine_phoshpate_driver::PConcentration(){
   int raw = readAvg(_pdPPin);
   Serial.println(raw);
   float x = (raw - darkOffsetP) / baseLineP; // (sig - DK)/ (sig(0) - DK)
-  x = x; // PUT CALIBRATION CURVE EQUATION HERE FOR PHOSPHATE
+  x = -4.6872*(x**2)-1.2342*x+6.1839; // PUT CALIBRATION CURVE EQUATION HERE FOR PHOSPHATE
   return x;
   // Serial.println("we started");
   // int raw = readAvg(_pdPPin);
@@ -105,4 +105,5 @@ float chlorine_phoshpate_driver::PConcentration(){
   // float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
   // return concentration;
 }
+
 
