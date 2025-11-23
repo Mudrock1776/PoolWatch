@@ -13,8 +13,8 @@ const int SAMPLE_COUNT = 32;
 const int DISCARD = 3;
 const int MIN_THRESH = 8;
 const float EPSILON = 1e-6f;
-const float baseLineCL = 5; // sig(0) - DK
-const float baseLineP = 5; // sig(0) - DK
+const int baseLineCL = 782; // sig(0) - DK
+const int baseLineP = 3900; // sig(0) - DK
 
 const int ADC_BITS = 12;
 const int ADC_MAX = (1 << ADC_BITS) - 1;
@@ -40,5 +40,6 @@ extern bool DEBUG;
 
 
 #endif
+
 
 
