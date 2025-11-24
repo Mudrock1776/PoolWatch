@@ -47,9 +47,9 @@ String PartSize = "small";
 BatteryMonitor batteryMonitor(34);
 TemperatureSensor tempSensor(33);
 Relay pump(RELAY1PIN);
-Relay solenoid1(RELAY2PIN);  
-Relay solenoid2(RELAY3PIN); 
-Relay stirrer(RELAY4PIN);    
+// Relay solenoid1(RELAY2PIN);  
+// Relay solenoid2(RELAY3PIN); 
+// Relay stirrer(RELAY4PIN);    
 
 
 //Relay On Timings 
@@ -65,7 +65,7 @@ LEDDriver chlorineLED(CL_PIN);
 LEDDriver phosphateLED(P_PIN); 
 chlorine_phoshpate_driver ConcentrationGetter(photoPin_cl, photoPin_ph);
 
-float statusOutput[5];
+int statusOutput;
 
 void isCuvvettesFilled() {
   //if (CuvvettesFull) return;
@@ -247,59 +247,57 @@ void loop() {
   bool fiveRegulator = debugPanelDrivers.get5RegStatus();
   bool twelveRegulator = debugPanelDrivers.get12RegStatus();
   bool pumpStatus = getPumpHealth();//tie to both 12V regulator being ok and if pump ever ran
-  PoolWatchWebDrivers.sendStatus(batteryCharge, pumpStatus, fiveRegulator, twelveRegulator, statusOutput);
-  if(statusOutput[0] != 0){
-    if (statusOutput[5]){
-      //Collect Water
-      isCuvvettesFilled();
-    }
-    if (statusOutput[4]){
-      //Run Particulate Test
-      //isCuvvettesFilled();
-      digitalWrite(LED_PIN, HIGH);
-      CaptureParsed res = slave.captureOnce(/*wakeLowMs=*/500);
-      PartAmount = res.count;
-      PartSize = res.s1 + ", " + res.s2 + ", " + res.s3;
-      digitalWrite(LED_PIN, LOW);
-      sendReport = true;
-    }
-    if (statusOutput[2]){
-      //runPhosphateSequence();
-      //Run Phosphate Test
-      ConcentrationGetter.setDKP(); //Gets new Dark current
-      phosphateLED.on();
-      delay(1000);
-      PCon = ConcentrationGetter.PConcentration();
-      phosphateLED.off();
-      sendReport = true;
-    }
-    if (statusOutput[3]){
-      //Run Temperature Test
-      tempF = tempSensor.getTempF();
-      if (tempF > 150){
-        while (tempF > 150){
-          if (DEBUG){
-            Serial.println("Something Went Wrong with the temperature sensor... Retrying");
-          }
-          tempF = tempSensor.getTempF();
+  statusOutput = PoolWatchWebDrivers.sendStatus(batteryCharge, pumpStatus, fiveRegulator, twelveRegulator);
+  if (statusOutput == 5){
+    //Collect Water
+    isCuvvettesFilled();
+  }
+  if (statusOutput == 4){
+    //Run Particulate Test
+    //isCuvvettesFilled();
+    digitalWrite(LED_PIN, HIGH);
+    CaptureParsed res = slave.captureOnce(/*wakeLowMs=*/500);
+    PartAmount = res.count;
+    PartSize = res.s1 + ", " + res.s2 + ", " + res.s3;
+    digitalWrite(LED_PIN, LOW);
+    sendReport = true;
+  }
+  if (statusOutput == 2){
+    //runPhosphateSequence();
+    //Run Phosphate Test
+    ConcentrationGetter.setDKP(); //Gets new Dark current
+    phosphateLED.on();
+    delay(1000);
+    PCon = ConcentrationGetter.PConcentration();
+    phosphateLED.off();
+    sendReport = true;
+  }
+  if (statusOutput == 3){
+    //Run Temperature Test
+    tempF = tempSensor.getTempF();
+    if (tempF > 150){
+      while (tempF > 150){
+        if (DEBUG){
+          Serial.println("Something Went Wrong with the temperature sensor... Retrying");
         }
+        tempF = tempSensor.getTempF();
       }
-      sendReport = true;
     }
-    if (statusOutput[1]){
-      //runChlorineSequence();
-      //Run Chlorine Test
-      ConcentrationGetter.setDKCL(); //Gets new Dark current
-      chlorineLED.on();
-      delay(1000);
-      CLCon = ConcentrationGetter.ClConcentration();
-      chlorineLED.off();
-      sendReport = true;
-    }
-    if (sendReport){
-      PoolWatchWebDrivers.sendReport(tempF, CLCon, PCon, PartAmount, PartSize);
-      sendReport = false;
-    }
+    sendReport = true;
+  }
+  if (statusOutput == 1){
+    //runChlorineSequence();
+    //Run Chlorine Test
+    //ConcentrationGetter.setDKCL(); //Gets new Dark current
+    chlorineLED.on();
+    delay(10000);
+    CLCon = ConcentrationGetter.ClConcentration();
+    chlorineLED.off();
+    sendReport = true;
+  }
+  if (sendReport){
+    PoolWatchWebDrivers.sendReport(tempF, CLCon, PCon, PartAmount, PartSize);
+    sendReport = false;
   }
   delay(StatusDelay);
 }
