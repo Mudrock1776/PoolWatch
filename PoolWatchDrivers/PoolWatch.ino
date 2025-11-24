@@ -6,6 +6,7 @@
 #include "BatteryMonitor.h"
 #include "esp32_I2C.h"
 #include "chlorine_phosphate_driver.h"
+#include <WiFi.h>
 
 
 
@@ -33,7 +34,7 @@ PiI2CSlaveCapture slave(ESP_I2C_ADDR, SDA_PIN, SCL_PIN, WAKE_PIN, I2C_HZ, CAPTUR
 char *SERVER_HOST = "device.necrass"; //This would be the hostname of the website
 char *SERVER_IP = "poolswatch.com"; //This is needed for my tests with my home webserver
 int SERVER_PORT = 80;
-int DEVICE_SERIAL = 1;
+int DEVICE_SERIAL = 2;
 unsigned long int StatusDelay = 5000;
 bool DEBUG = true;
 bool CuvvettesFull;
@@ -85,123 +86,123 @@ void isCuvvettesFilled() {
 
 
 //chlorineParticulate Run 
-void runChlorineSequence() {
-  if (DEBUG) {
-    Serial.println("=== Running Chlorine Sequence ===");
-  }
-  isCuvvettesFilled();
-  //delay to load prefilled reagents
-  if (loadingDelay > 0) {
-    if (DEBUG) {
-    Serial.println("Loading delay before chlorine reagent...");
-  }
-    unsigned long startWait = millis();
-    while (millis() - startWait < loadingDelay) { 
-      delay(10); 
-    }
-  }
-  if (DEBUG) {
-    Serial.println("Solenoid 1 ON for chlorine reagents");
-  }
-  solenoid1.turnOnFor(solenoidMs);
-  while (solenoid1.state() == HIGH) {
-    solenoid1.update();
-  }
-  if (DEBUG) {
-    Serial.println("Solenoid 1 OFF");
-  }
-  if (DEBUG) {
-    Serial.println("Stirrer ON");
-  }
-  stirrer.turnOnFor(stirrerMs);
-  while (stirrer.state() == HIGH) {
-    stirrer.update();
-  }
-  if (DEBUG) {
-  Serial.println("Stirrer OFF");
-  Serial.println("=== Chlorine Sequence Done ===");
-  }
-}
+// void runChlorineSequence() {
+//   if (DEBUG) {
+//     Serial.println("=== Running Chlorine Sequence ===");
+//   }
+//   isCuvvettesFilled();
+//   //delay to load prefilled reagents
+//   if (loadingDelay > 0) {
+//     if (DEBUG) {
+//     Serial.println("Loading delay before chlorine reagent...");
+//   }
+//     unsigned long startWait = millis();
+//     while (millis() - startWait < loadingDelay) { 
+//       delay(10); 
+//     }
+//   }
+//   if (DEBUG) {
+//     Serial.println("Solenoid 1 ON for chlorine reagents");
+//   }
+//   solenoid1.turnOnFor(solenoidMs);
+//   while (solenoid1.state() == HIGH) {
+//     solenoid1.update();
+//   }
+//   if (DEBUG) {
+//     Serial.println("Solenoid 1 OFF");
+//   }
+//   if (DEBUG) {
+//     Serial.println("Stirrer ON");
+//   }
+//   stirrer.turnOnFor(stirrerMs);
+//   while (stirrer.state() == HIGH) {
+//     stirrer.update();
+//   }
+//   if (DEBUG) {
+//   Serial.println("Stirrer OFF");
+//   Serial.println("=== Chlorine Sequence Done ===");
+//   }
+// }
 
-//phosphate run
-void runPhosphateSequence() {
-  if (DEBUG) {
-    Serial.println("=== Running Phosphate Sequence ===");
-  }
-  isCuvvettesFilled();
-  if (loadingDelay > 0) {
-    if (DEBUG) {
-      Serial.println("Loading delay before first phosphate reagent...");
-  }
-    unsigned long startWait = millis();
-    while (millis() - startWait < loadingDelay) { 
-      delay(10); 
-    }
-  }
-    if (DEBUG) {
-      Serial.println("Solenoid 2 ON (phosphate reagent 1)");
-    }
-  //run solenoid 2 for Reagent 1
-  solenoid2.turnOnFor(solenoidMs);
-  while (solenoid2.state() == HIGH) {
-    solenoid2.update();
-  }
-    if (DEBUG) {
-      Serial.println("Solenoid 2 OFF");
-      Serial.println("Stirrer ON");
-    }
-  stirrer.turnOnFor(stirrerMs);
-  while (stirrer.state() == HIGH) {
-    stirrer.update();
-  }
-    if (DEBUG) {
-      Serial.println("Stirrer OFF");
-    }
-  //Wait 1.30 min b/f adding next reagent 
-  if (phosphateWait > 0) {
-    if (DEBUG) {
-      Serial.println("Waiting 1 min 30 sec before second phosphate reagent...");
-    }
-      unsigned long startWait = millis();
-    while (millis() - startWait < phosphateWait) {
-      delay(10);
-    }
-  }
-  if (DEBUG) {
-      Serial.println("Wait 30 sec)");
-  }
-  delay(30000);
-    if (DEBUG) {
-      Serial.println("Solenoid 2 ON (phosphate reagent 2)");
-    }
-  solenoid2.turnOnFor(solenoidMs);
-  while (solenoid2.state() == HIGH) {
-    solenoid2.update();
-  }
-    if (DEBUG) {
-      Serial.println("Solenoid 2 OFF");
-      Serial.println("Stirrer ON for second mix");
-    }
-  stirrer.turnOnFor(stirrerMs);
-  while (stirrer.state() == HIGH) {
-    stirrer.update();
-  }
-    if (DEBUG) {
-      Serial.println("Stirrer OFF");
-    }
-  if (phosphateWait2 > 0) {
-    if (DEBUG) {
-      Serial.println("Final wait after phosphate sequence...");
-    }
-    unsigned long startWait2 = millis();
-    while (millis() - startWait2 < phosphateWait2) {
-      delay(10);
-    }
-  }
-  if (DEBUG) {
-      Serial.println("=== Phosphate Sequence Done ===");
-  }
-}
+// //phosphate run
+// void runPhosphateSequence() {
+//   if (DEBUG) {
+//     Serial.println("=== Running Phosphate Sequence ===");
+//   }
+//   isCuvvettesFilled();
+//   if (loadingDelay > 0) {
+//     if (DEBUG) {
+//       Serial.println("Loading delay before first phosphate reagent...");
+//   }
+//     unsigned long startWait = millis();
+//     while (millis() - startWait < loadingDelay) { 
+//       delay(10); 
+//     }
+//   }
+//     if (DEBUG) {
+//       Serial.println("Solenoid 2 ON (phosphate reagent 1)");
+//     }
+//   //run solenoid 2 for Reagent 1
+//   solenoid2.turnOnFor(solenoidMs);
+//   while (solenoid2.state() == HIGH) {
+//     solenoid2.update();
+//   }
+//     if (DEBUG) {
+//       Serial.println("Solenoid 2 OFF");
+//       Serial.println("Stirrer ON");
+//     }
+//   stirrer.turnOnFor(stirrerMs);
+//   while (stirrer.state() == HIGH) {
+//     stirrer.update();
+//   }
+//     if (DEBUG) {
+//       Serial.println("Stirrer OFF");
+//     }
+//   //Wait 1.30 min b/f adding next reagent 
+//   if (phosphateWait > 0) {
+//     if (DEBUG) {
+//       Serial.println("Waiting 1 min 30 sec before second phosphate reagent...");
+//     }
+//       unsigned long startWait = millis();
+//     while (millis() - startWait < phosphateWait) {
+//       delay(10);
+//     }
+//   }
+//   if (DEBUG) {
+//       Serial.println("Wait 30 sec)");
+//   }
+//   delay(30000);
+//     if (DEBUG) {
+//       Serial.println("Solenoid 2 ON (phosphate reagent 2)");
+//     }
+//   solenoid2.turnOnFor(solenoidMs);
+//   while (solenoid2.state() == HIGH) {
+//     solenoid2.update();
+//   }
+//     if (DEBUG) {
+//       Serial.println("Solenoid 2 OFF");
+//       Serial.println("Stirrer ON for second mix");
+//     }
+//   stirrer.turnOnFor(stirrerMs);
+//   while (stirrer.state() == HIGH) {
+//     stirrer.update();
+//   }
+//     if (DEBUG) {
+//       Serial.println("Stirrer OFF");
+//     }
+//   if (phosphateWait2 > 0) {
+//     if (DEBUG) {
+//       Serial.println("Final wait after phosphate sequence...");
+//     }
+//     unsigned long startWait2 = millis();
+//     while (millis() - startWait2 < phosphateWait2) {
+//       delay(10);
+//     }
+//   }
+//   if (DEBUG) {
+//       Serial.println("=== Phosphate Sequence Done ===");
+//   }
+// }
 
 bool getPumpHealth() {
     return pumpEverRan && debugPanelDrivers.get12RegStatus();
@@ -211,6 +212,7 @@ void setup() {
   if (DEBUG){
     Serial.begin(115200);
   }
+  ConcentrationGetter.begin();
   // Establish Connection to Web Server
   PoolWatchWebDrivers.connectWiFi(WIFI_SSID,WIFI_PASSWORD);
   PoolWatchWebDrivers.establishDevice(SERVER_HOST,SERVER_IP,SERVER_PORT,DEVICE_SERIAL);
@@ -236,7 +238,6 @@ void setup() {
 
   chlorineLED.off();
   phosphateLED.off();
-  ConcentrationGetter.begin();
   debugPanelDrivers.setStatus(true, true, true, true);
   delay(1000);
 }
@@ -288,9 +289,9 @@ void loop() {
   if ((statusOutput & 1) == 1){
     //runChlorineSequence();
     //Run Chlorine Test
-    //ConcentrationGetter.setDKCL(); //Gets new Dark current
+    ConcentrationGetter.setDKCL(); //Gets new Dark current
     chlorineLED.on();
-    delay(10000);
+    delay(1000);
     CLCon = ConcentrationGetter.ClConcentration();
     chlorineLED.off();
     sendReport = true;
