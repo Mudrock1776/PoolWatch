@@ -140,6 +140,7 @@ int webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, bo
   String pumpStatusString;
   String fiveRegulatorString;
   String twelveRegulatorString;
+  int outcode = 0;
   if (pumpStatus){
     pumpStatusString = "true";
   } else {
@@ -196,22 +197,23 @@ int webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, bo
     }
     String fillWater = pullData(returnedMsg, "\"fillWater\":");
     if (testChlorine == "true"){
-      return 1;
+      outcode += 1;
     }
     if (testPhosphate == "true"){
-      return 2;
+      outcode += 2;
     }
     if (testTempature == "true"){
-      return 3;
+      outcode += 4;
     }
     if (testParticulate == "true"){
-      return 4;
+      outcode += 8;
     }
     if (fillWater == "true"){
-      return 5;
+      outcode += 16;
     }
   }
-  return 0;
+  return outcode;
 }
+
 
 webserver PoolWatchWebDrivers = webserver();
