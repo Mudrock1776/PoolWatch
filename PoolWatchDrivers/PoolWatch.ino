@@ -248,11 +248,11 @@ void loop() {
   bool twelveRegulator = debugPanelDrivers.get12RegStatus();
   bool pumpStatus = getPumpHealth();//tie to both 12V regulator being ok and if pump ever ran
   statusOutput = PoolWatchWebDrivers.sendStatus(batteryCharge, pumpStatus, fiveRegulator, twelveRegulator);
-  if (statusOutput == 5){
+  if ((statusOutput & 16) == 16){
     //Collect Water
     isCuvvettesFilled();
   }
-  if (statusOutput == 4){
+  if ((statusOutput & 8) == 8){
     //Run Particulate Test
     //isCuvvettesFilled();
     digitalWrite(LED_PIN, HIGH);
@@ -262,7 +262,7 @@ void loop() {
     digitalWrite(LED_PIN, LOW);
     sendReport = true;
   }
-  if (statusOutput == 2){
+  if ((statusOutput & 2) == 2){
     //runPhosphateSequence();
     //Run Phosphate Test
     ConcentrationGetter.setDKP(); //Gets new Dark current
@@ -272,7 +272,7 @@ void loop() {
     phosphateLED.off();
     sendReport = true;
   }
-  if (statusOutput == 3){
+  if ((statusOutput & 4) == 4){
     //Run Temperature Test
     tempF = tempSensor.getTempF();
     if (tempF > 150){
@@ -285,7 +285,7 @@ void loop() {
     }
     sendReport = true;
   }
-  if (statusOutput == 1){
+  if ((statusOutput & 1) == 1){
     //runChlorineSequence();
     //Run Chlorine Test
     //ConcentrationGetter.setDKCL(); //Gets new Dark current
