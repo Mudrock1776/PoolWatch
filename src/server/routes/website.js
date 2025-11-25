@@ -147,4 +147,9 @@ Routes.route("/notify/remove").post((req, res) => {
     website.removeUpdateServer(req,res);
 });
 
+Routes.route("/emails").get((req, res) => {
+    website.getEmails(req,res);
+});
+
+
 module.exports = Routes;

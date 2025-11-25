@@ -3,6 +3,7 @@ const report = require("../models/report");
 const updateServer = require("../models/notify");
 const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
+const emails = require("../models/emails");
 
 const transporter = nodemailer.createTransport({
     service: process.env.EMAILSERVICE,
@@ -12,7 +13,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-function sendEmial(to, subj, msg){
+async function sendEmial(to, subj, msg){
+    var newEmail = new emails({
+        to: to,
+        subject: subj,
+        text: msg
+    });
+    await newEmail.save();
     const mailOptions = {
         from: process.env.EMAILUSERNAME,
         to: to,
