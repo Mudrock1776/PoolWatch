@@ -1,0 +1,123 @@
+#include "chlorine_phosphate_driver.h"
+
+chlorine_phoshpate_driver::chlorine_phoshpate_driver(uint8_t Clpin, uint8_t Ppin){
+  _pdClPin = Clpin; 
+  _pdPPin = Ppin;
+}
+
+int readAvg(int photoPin) {
+  static uint16_t s[SAMPLE_COUNT];
+  for (int i=0;i<SAMPLE_COUNT;i++){
+    int r = analogRead(photoPin);
+    if (false) r = ADC_MAX - r;
+    s[i]=r;
+    delay(2);
+  }
+  // sort
+  for (int i=1;i<SAMPLE_COUNT;i++){
+    uint16_t k = s[i]; int j=i-1;
+    while (j>=0 && s[j]>k) { s[j+1]=s[j]; j--; }
+    s[j+1]=k;
+  }
+  long sum=0; int cnt=0;
+  for (int i=DISCARD;i<SAMPLE_COUNT-DISCARD;i++){ sum+=s[i]; cnt++; }
+  return cnt? (int)(sum/cnt) : 0;
+}
+
+void chlorine_phoshpate_driver::begin(){
+  analogReadResolution(12);
+  analogSetPinAttenuation(_pdClPin, ADC_11db);
+  analogSetPinAttenuation(_pdPPin, ADC_11db);
+  darkOffsetCl = readAvg(_pdClPin);
+  darkOffsetP = readAvg(_pdPPin);
+}
+
+void chlorine_phoshpate_driver::setDKCL(){
+  darkOffsetCl = readAvg(_pdClPin);
+}
+void chlorine_phoshpate_driver::setDKP(){
+  darkOffsetP = readAvg(_pdPPin);
+}
+
+float chlorine_phoshpate_driver::ClConcentration(){
+  int raw = readAvg(_pdClPin);
+  Serial.println(raw);
+  float x = float(raw - darkOffsetCl) / (baseLineCL- darkOffsetCl); // (sig - DK)/ (sig(0) - DK)
+  //float x = (raw - darkOffsetCl) / (float)baseLineCL;
+  //float x = ((float)raw - (float)darkOffsetP) / (float)baseLineP;
+  //x = 87.139*(x*x)-219.7*x+132.69; // PUT CALIBRATION CURVE EQUATION HERE FOR CHLORINE
+  //float y = 87.139f * (x * x) - 219.7f * x + 132.69f;
+  float y = - 62.622f * x + 62.638f;
+  Serial.println(x);
+  Serial.println(y);
+  return y;
+  //return y; 
+  // int sampleCorr = darkOffsetCl- raw;
+  // Serial.println(sampleCorr);
+  // if (sampleCorr < 0) sampleCorr = 0;
+  // float I0corr = max(EPSILON, referenceIntensity - darkOffsetCl);
+  // float Isample_corr_f = referenceIntensity - sampleCorr; //(float)sampleCorr;
+  // I0corr = referenceIntensity - I0corr;
+  // float intensityRatio = 1.0f;
+  // float A = 0.0f;
+  // Serial.println(Isample_corr_f);
+  // if (Isample_corr_f >= MIN_THRESH && I0corr > EPSILON) {
+  //   intensityRatio = Isample_corr_f / I0corr;
+  //   if (intensityRatio < EPSILON) intensityRatio = EPSILON;
+  //   if (intensityRatio > 1.0f) intensityRatio = 1.0f;
+  //   A = log10(1.0f / intensityRatio);
+  //   if (A < 0) A = 0;
+  // } else {
+  //   // insufficient signal
+  //   Serial.println("Not Working");
+  //   Serial.println(I0corr);
+  //   intensityRatio = (I0corr>EPSILON) ? (Isample_corr_f / I0corr) : 1.0f;
+  //   A = 0.0f;
+  // }
+  // float concentration = (A / (molarAbsorptivityCl * pathLength)) * molarMassCl * 1000.0f;
+  // return concentration; 
+}
+
+float chlorine_phoshpate_driver::PConcentration(){
+  int raw = readAvg(_pdPPin);
+  Serial.println(raw);
+  float x =  float(raw - darkOffsetP) / (baseLineP-darkOffsetP); // (sig - DK)/ (sig(0) - DK)
+  //x = -4.6872*(x*x)-1.2342*x+6.1839; // PUT CALIBRATION CURVE EQUATION HERE FOR PHOSPHATE
+  // float x = (raw - darkOffsetP) / (float)baseLineP;
+  float y = -4.6872f * (x * x) - 1.2342f * x + 6.1839f;
+  //float y = 14.619f * (x * x) -29.61f * x + 15.011f;
+  //might need to conver the above to float
+  Serial.println(x);
+  Serial.println(y);
+  return y;
+  //return y; 
+  // Serial.println("we started");
+  // int raw = readAvg(_pdPPin);
+  // int sampleCorr = darkOffsetP - raw;
+  // if (sampleCorr < 0) sampleCorr = 0;
+  // float I0corr = max(EPSILON, referenceIntensity - darkOffsetP);
+  // float Isample_corr_f = referenceIntensity - sampleCorr;
+  // I0corr = referenceIntensity - I0corr;
+  // float intensityRatio = 1.0f;
+  // float A = 0.0f;
+
+  // if (Isample_corr_f >= MIN_THRESH && I0corr > EPSILON) {
+  //   Serial.println("intensisty Crap");
+  //   intensityRatio = Isample_corr_f / I0corr;
+  //   Serial.println(intensityRatio);
+  //   if (intensityRatio < EPSILON) intensityRatio = EPSILON;
+  //   if (intensityRatio > 1.0f) intensityRatio = 1.0f;
+  //   Serial.println(intensityRatio);
+  //   A = log10(1.0f / intensityRatio);
+  //   if (A < 0) A = 0;
+  // } else {
+  //   // insufficient signal
+  //   intensityRatio = (I0corr>EPSILON) ? (Isample_corr_f / I0corr) : 1.0f;
+  //   A = 0.0f;
+  // }
+  // Serial.println(A);
+  // float concentration = (A / (molarAbsorptivityP * pathLength)) * molarMassP * 1000.0f;
+  // return concentration;
+}
+
+

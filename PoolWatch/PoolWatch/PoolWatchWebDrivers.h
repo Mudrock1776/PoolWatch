@@ -1,0 +1,23 @@
+#ifndef POOL_WATCH_WEB_DRIVERS_H
+#define POOL_WATCH_WEB_DRIVERS_H
+
+class webserver{
+  private:
+    char *ssid;
+    char *password;
+    char *IP;
+    char *host;
+    int port;
+    int serialNumber;
+  public:
+    webserver();
+    void connectWiFi(char *wifi_ssid, char *wifi_password);
+    void establishDevice(char *server_hostname, char *server_ip, int server_port, int device_serialNumber);
+    void sendReport(float tempature, float ClCon, float PCon, float particulateAmount, String particulateSize);
+    int sendStatus(float battery, bool pumpStatus, bool fiveRegulator, bool twelveRegulator);
+};
+
+extern webserver PoolWatchWebDrivers;
+extern bool DEBUG;
+
+#endif
