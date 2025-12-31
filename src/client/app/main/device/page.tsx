@@ -70,6 +70,7 @@ export default function Page(){
         var Phosphate = false;
         var Tempature = false;
         var Particulate = false;
+        var Cuvettes = false;
         switch (test) {
             case "Chlorine":
                 Chlorine = true;
@@ -83,6 +84,9 @@ export default function Page(){
             case "Particulate":
                 Particulate = true;
                 break;
+            case "Cuvettes":
+                Cuvettes = true;
+                break;
         }
         const res = await fetch("/test/request", {
             method: "POST",
@@ -94,7 +98,8 @@ export default function Page(){
                 testChlorine: Chlorine,
                 testPhosphate: Phosphate,
                 testTempature: Tempature,
-                testParticulate: Particulate
+                testParticulate: Particulate,
+                fillWater: Cuvettes
             })
         });
     }
@@ -184,6 +189,7 @@ export default function Page(){
                     <button onClick={(e)=>{requestTest(e, "Phoshate")}} className="mb-2 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Test Phosphate</button>
                     <button onClick={(e)=>{requestTest(e, "Tempature")}} className="mb-2 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Test Temperature</button>
                     <button onClick={(e)=>{requestTest(e, "Particulate")}} className="mb-2 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Test Particulate</button>
+                    <button onClick={(e)=>{requestTest(e, "Cuvettes")}} className="mb-2 block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Fill Cuvettes</button>
                 </div>
             </div>
             {(() => {

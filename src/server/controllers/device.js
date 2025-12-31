@@ -3,6 +3,7 @@ const report = require("../models/report");
 const updateServer = require("../models/notify");
 const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
+const emails = require("../models/emails");
 
 const transporter = nodemailer.createTransport({
     service: process.env.EMAILSERVICE,
@@ -12,7 +13,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-function sendEmial(to, subj, msg){
+async function sendEmial(to, subj, msg){
+    var newEmail = new emails({
+        to: to,
+        subject: subj,
+        text: msg
+    });
+    await newEmail.save();
     const mailOptions = {
         from: process.env.EMAILUSERNAME,
         to: to,
@@ -76,6 +83,7 @@ exports.createDevice = async (req, res) => {
             testPhosphate: false,
             testTempature: false,
             testParticulate: false,
+            fillWater: false,
             updateServers: [],
             reports: [],
             lastUpdate: now.getTime(),
@@ -218,6 +226,7 @@ exports.statusUpdate = async (req, res) => {
             testPhosphate: modifiedDevice.testPhosphate,
             testTempature: modifiedDevice.testTempature,
             testParticulate: modifiedDevice.testParticulate,
+            fillWater: modifiedDevice.fillWater,
         });
         await device.findOneAndUpdate({serialNumber: req.body.serialNumber},{
             battery: req.body.battery,
@@ -230,6 +239,7 @@ exports.statusUpdate = async (req, res) => {
             testPhosphate: false,
             testTempature: false,
             testParticulate: false,
+            fillWater: false,
             lastUpdate: now.getTime()
         });
     } catch(err){

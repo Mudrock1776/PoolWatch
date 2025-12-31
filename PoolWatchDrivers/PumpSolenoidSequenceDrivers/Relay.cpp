@@ -1,7 +1,5 @@
 #include "Relay.h"
 
-bool DEBUG = true;
-
 Relay::Relay(uint8_t relayNum) {
    relayPin = relayNum; 
 }

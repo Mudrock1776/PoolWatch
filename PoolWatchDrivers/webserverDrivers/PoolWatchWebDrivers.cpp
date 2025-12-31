@@ -44,6 +44,9 @@ void webserver::connectWiFi(char *wifi_ssid, char *wifi_password){
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
+    if (DEBUG){
+      Serial.println("Connecting...");
+    }
     delay(500);
   }
 
@@ -89,12 +92,24 @@ void webserver::establishDevice(char *server_hostname, char *server_ip, int serv
       Serial.println(returnedMsg2);
     }
   }
+  // WiFi.disconnect();
+  // WiFi.mode(WIFI_OFF);
 }
 
 void webserver::sendReport(float tempature, float ClCon, float PCon, float particulateAmount, String particulateSize){
+  // WiFi.begin(ssid, password);
+
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   if (DEBUG){
+  //     Serial.println("Connecting...");
+  //   }
+  //   delay(500);
+  // }
   NetworkClient client;
 
   if (!client.connect(IP, port)) {
+    // WiFi.disconnect();
+    // WiFi.mode(WIFI_OFF);
     return;
   }
   String body = "{\"serialNumber\": "+ String(serialNumber) +", \"report\": {\"tempature\": "+ String(tempature) +", \"ClCon\": "+ String(ClCon) +", \"PCon\": "+ String(PCon) +", \"particulateAmount\": "+ String(particulateAmount) +", \"particulateSize\": \""+ particulateSize +"\"}}";
@@ -108,19 +123,24 @@ void webserver::sendReport(float tempature, float ClCon, float PCon, float parti
   if (DEBUG){
     Serial.println(returnedMsg);
   }
-  return;
+  // WiFi.disconnect();
+  // WiFi.mode(WIFI_OFF);
 }
 
-void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, bool twelveRegulator, float output[5]){
+int webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, bool twelveRegulator){
+  // WiFi.begin(ssid, password);
+
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   if (DEBUG){
+  //     Serial.println("Connecting...");
+  //   }
+  //   delay(500);
+  // }
   NetworkClient client;
   String pumpStatusString;
   String fiveRegulatorString;
   String twelveRegulatorString;
-  output[0] = 0;
-  output[1] = 0;
-  output[2] = 0;
-  output[3] = 0;
-  output[4] = 0;
+  int outcode = 0;
   if (pumpStatus){
     pumpStatusString = "true";
   } else {
@@ -137,7 +157,9 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
     twelveRegulatorString = "false";
   }
   if (!client.connect(IP, port)) {
-    return;
+    // WiFi.disconnect();
+    // WiFi.mode(WIFI_OFF);
+    return 0;
   }
   String body = "{\"serialNumber\": "+ String(serialNumber) +", \"battery\": " + String(battery) + ", \"pumpStatus\": " + pumpStatusString + ", \"fiveRegulator\": " + fiveRegulatorString + ", \"twelveRegulator\": " + twelveRegulatorString + "}";
   String msg = "POST /status/update HTTP/1.1\r\nHost: "+String(host)+":"+port+"\r\nContent-Type: application/json\r\nContent-Length: "+body.length()+"\r\nConnection: close\r\n\r\n" + body;
@@ -146,7 +168,9 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
   }
   client.print(msg);
   String returnedMsg = readResponse(&client);
-  client.stop();
+  // client.stop();
+  // WiFi.disconnect();
+  // WiFi.mode(WIFI_OFF);
   if (DEBUG){
     Serial.println(returnedMsg);
   }
@@ -155,7 +179,6 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
     Serial.println(needUpdate);
   }
   if (needUpdate == "true"){
-    output[0] = pullData(returnedMsg,"\"sampleRate\":").toFloat();
     String testChlorine = pullData(returnedMsg, "\"testChlorine\":");
     if (DEBUG){
       Serial.println(testChlorine);
@@ -172,20 +195,25 @@ void webserver::sendStatus(float battery, bool pumpStatus, bool fiveRegulator, b
     if (DEBUG){
       Serial.println(testParticulate);
     }
+    String fillWater = pullData(returnedMsg, "\"fillWater\":");
     if (testChlorine == "true"){
-      output[1] = 1;
+      outcode += 1;
     }
     if (testPhosphate == "true"){
-      output[2] = 1;
+      outcode += 2;
     }
     if (testTempature == "true"){
-      output[3] = 1;
+      outcode += 4;
     }
     if (testParticulate == "true"){
-      output[4] = 1;
+      outcode += 8;
     }
-    return;
+    if (fillWater == "true"){
+      outcode += 16;
+    }
   }
+  return outcode;
 }
+
 
 webserver PoolWatchWebDrivers = webserver();

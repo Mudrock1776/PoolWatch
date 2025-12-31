@@ -1,5 +1,6 @@
 const account = require("../models/account");
 const device = require("../models/device");
+const emails = require("../models/emails");
 const mongoose = require("mongoose");
 
 //acounts
@@ -160,6 +161,9 @@ exports.requestTest = async (req, res) => {
         if (req.body.testParticulate){
             searchedDevice.testParticulate = true;
         }
+        if (req.body.fillWater){
+            searchedDevice.fillWater = true;
+        }
         searchedDevice.needUpdate = true;
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send();
@@ -205,6 +209,20 @@ exports.removeUpdateServer = async (req, res) =>{
         await device.findByIdAndUpdate(searchedDevice._id, searchedDevice);
         res.status(200).send(searchedDevice);
     } catch(err){
+        console.log(err);
+        res.status(400).send(err);
+    }
+}
+
+exports.getEmails = async (req, res) =>{
+    try {
+        var messages = await emails.find({});
+        res.status(200).send(messages);
+        for (let i = 0; i < messages.length; i++) {
+            const element = messages[i];
+            await emails.findByIdAndDelete(element._id);
+        }
+    }catch(err){
         console.log(err);
         res.status(400).send(err);
     }

@@ -1,6 +1,5 @@
 #include "LEDDriver.h"
 
-bool DEBUG = true;
 
 LEDDriver::LEDDriver(uint8_t LEDpin){
   _ledPin = LEDpin; 
